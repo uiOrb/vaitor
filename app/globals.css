@@ -1,0 +1,264 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === VAITOR DESIGN TOKENS === */
+:root {
+  --color-void: #09090B;
+  --color-nebula: #0D0D1A;
+  --color-star-white: #F5F5F7;
+  --color-muted: #A1A1AA;
+  --color-accent-pulse: #6366F1;
+  --color-accent-glow: #818CF8;
+  --color-signal: #E4E4E7;
+  --color-surface: #18181B;
+
+  --font-display: 'Inter', sans-serif;
+  --font-accent: 'DM Serif Display', serif;
+
+  --size-hero: clamp(56px, 8vw, 96px);
+  --size-h2: 48px;
+  --size-h3: 28px;
+  --size-body: 18px;
+  --size-caption: 13px;
+  --size-label: 11px;
+
+  --space-xs: 8px;
+  --space-sm: 16px;
+  --space-md: 32px;
+  --space-lg: 64px;
+  --space-xl: 96px;
+  --space-2xl: 160px;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-pill: 100px;
+  --border-subtle: 1px solid rgba(255,255,255,0.06);
+
+  --ease-smooth: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-default: 700ms;
+  --duration-fast: 300ms;
+}
+
+/* === RESET & BASE === */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--color-void);
+}
+
+body {
+  background-color: var(--color-void);
+  color: var(--color-star-white);
+  font-family: var(--font-display);
+  font-size: var(--size-body);
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* === TYPOGRAPHY === */
+h1 {
+  font-size: var(--size-hero);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+  color: var(--color-star-white);
+}
+
+h2 {
+  font-size: var(--size-h2);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: var(--color-star-white);
+}
+
+h3 {
+  font-size: var(--size-h3);
+  font-weight: 600;
+  color: var(--color-star-white);
+}
+
+p {
+  color: var(--color-muted);
+  line-height: 1.75;
+}
+
+/* === SECTION SYSTEM === */
+.section {
+  padding: var(--space-2xl) 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-md);
+}
+
+/* === SECTION LABEL === */
+.section-label {
+  font-size: var(--size-label);
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-accent-glow);
+  margin-bottom: var(--space-sm);
+}
+
+/* === BUTTONS === */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: var(--color-accent-pulse);
+  border: none;
+  border-radius: var(--radius-pill);
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: transform var(--duration-fast) var(--ease-smooth),
+              box-shadow var(--duration-fast) var(--ease-smooth);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+}
+
+.btn-primary:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 24px rgba(99,102,241,0.45);
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  background: transparent;
+  border: 1px solid var(--color-signal);
+  border-radius: var(--radius-pill);
+  color: var(--color-star-white);
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-smooth);
+  text-decoration: none;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.04);
+}
+
+/* === CARDS === */
+.card {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.06);
+  padding: var(--space-md);
+}
+
+/* === SCROLL REVEAL === */
+.reveal {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity var(--duration-default) var(--ease-smooth),
+              transform var(--duration-default) var(--ease-smooth);
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* === DIVIDER === */
+.divider {
+  height: 1px;
+  background: rgba(255,255,255,0.06);
+  border: none;
+}
+
+/* === FORM FIELDS === */
+.form-field {
+  width: 100%;
+  background: var(--color-surface);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 14px 18px;
+  color: var(--color-star-white);
+  font-size: var(--size-body);
+  font-family: var(--font-display);
+  transition: border-color var(--duration-fast) var(--ease-smooth),
+              box-shadow var(--duration-fast) var(--ease-smooth);
+  outline: none;
+  resize: none;
+}
+
+.form-field::placeholder {
+  color: var(--color-muted);
+}
+
+.form-field:focus {
+  border-color: var(--color-accent-pulse);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+}
+
+/* === SKILL TAGS === */
+.skill-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 100px;
+  background: rgba(99,102,241,0.1);
+  border: 1px solid rgba(99,102,241,0.25);
+  color: var(--color-accent-glow);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+}
+
+/* === SCROLLBAR === */
+::-webkit-scrollbar {
+  width: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(99,102,241,0.4);
+  border-radius: 2px;
+}
+
+/* === SELECTION === */
+::selection {
+  background: rgba(99,102,241,0.3);
+  color: var(--color-star-white);
+}
+
+/* === MOBILE === */
+@media (max-width: 768px) {
+  h1 {
+    font-size: clamp(36px, 10vw, 56px);
+  }
+
+  h2 {
+    font-size: 32px;
+  }
+
+  .section {
+    padding: var(--space-xl) 0;
+  }
+
+  .section-inner {
+    padding: 0 var(--space-sm);
+  }
+}
