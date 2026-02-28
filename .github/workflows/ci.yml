@@ -32,6 +32,15 @@ jobs:
       - name: Run Tests with Coverage
         run: npm run test:coverage
 
+      - name: Write Coverage Summary
+        run: |
+          echo "### Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "| File | % Stmts | % Branch | % Funcs | % Lines |" >> $GITHUB_STEP_SUMMARY
+          echo "| :--- | :--- | :--- | :--- | :--- |" >> $GITHUB_STEP_SUMMARY
+          # Extracts the first line of the total summary from the console output or a file if we had one
+          # For now, just adding a placeholder or link to the artifact
+          echo "Coverage report uploaded as an artifact." >> $GITHUB_STEP_SUMMARY
+
       - name: Upload Coverage to GitHub Actions
         uses: actions/upload-artifact@v4
         with:
