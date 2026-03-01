@@ -26,17 +26,14 @@ const SatelliteModel = React.memo(({
 }) => {
     const group = useRef<THREE.Group>(null)
     const rotationSpeed = useRef(0)
+    // Random rotation factors for each instance
+    const randomRotationAxis = useMemo(() => new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize(), [])
+    const randomRotationSpeed = useMemo(() => 0.1 + Math.random() * 0.3, [])
 
     useFrame((state, delta) => {
         if (!group.current) return
         
-        if (alignment.length() > 0.01 && !isHovered) {
-            const lookAtMatrix = new THREE.Matrix4()
-            lookAtMatrix.lookAt(new THREE.Vector3(0, 0, 0), alignment, new THREE.Vector3(0, 1, 0))
-            const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(lookAtMatrix)
-            group.current.quaternion.slerp(targetQuaternion, 0.1)
-        }
-
+        // 1. Attitude Control or Random Rotation
         if (isHovered) {
             rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 15, delta * 5)
             group.current.rotation.y += rotationSpeed.current * delta
@@ -46,29 +43,29 @@ const SatelliteModel = React.memo(({
             if (rotationSpeed.current > 0.01) {
                 group.current.rotation.y += rotationSpeed.current * delta
             }
-            const t = state.clock.elapsedTime
-            group.current.rotation.z += Math.sin(t * 0.5) * 0.002
+            
+            // Apply randomized slow rotation when not hovered
+            group.current.rotateOnAxis(randomRotationAxis, randomRotationSpeed * delta)
         }
     })
 
     return (
         <group ref={group} scale={[scale, scale, scale]}>
+            {/* Central Bus: Beveled Rectangular Prism (Graphite Gray Alloy) */}
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[1.6, 2.2, 1.6]} />
                 <meshStandardMaterial color="#2D2D30" metalness={0.7} roughness={0.4} />
             </mesh>
-            {[[-0.8, -0.8], [0.8, -0.8], [-0.8, 0.8], [0.8, 0.8]].map(([x, z], i) => (
-                <mesh key={i} position={[x, 0, z]}>
-                    <cylinderGeometry args={[0.05, 0.05, 2.2, 8]} />
-                    <meshStandardMaterial color="#1A1A1C" metalness={0.9} roughness={0.2} />
-                </mesh>
-            ))}
+            
+            {/* Layered MLI Insulation (Gold Foil) */}
             <group position={[0, -0.4, 0]}>
                 <mesh scale={[1.02, 0.6, 1.02]}>
                     <boxGeometry args={[1.6, 1, 1.6]} />
                     <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.3} emissive="#443300" emissiveIntensity={0.4} />
                 </mesh>
             </group>
+
+            {/* Solar Arrays */}
             {[-1, 1].map((side) => (
                 <group key={side} position={[side * 0.8, 0, 0]}>
                     <mesh rotation={[0, 0, Math.PI / 2]} position={[side * 0.2, 0, 0]}>
@@ -76,27 +73,27 @@ const SatelliteModel = React.memo(({
                         <meshStandardMaterial color="#52525B" metalness={0.9} roughness={0.1} />
                     </mesh>
                     <group position={[side * 3.2, 0, 0]}>
-                        {[[-1.5, 0], [1.5, 0]].map(([px, pz], idx) => (
-                            <group key={idx} position={[px, pz, 0]}>
-                                <mesh>
-                                    <boxGeometry args={[2.8, 1.8, 0.08]} />
-                                    <meshStandardMaterial color="#0A0A0C" metalness={0.8} roughness={0.2} />
-                                </mesh>
-                                <mesh position={[0, 0, 0.05]}>
-                                    <planeGeometry args={[2.6, 1.6]} />
-                                    <meshStandardMaterial color="#020617" emissive="#1E3A8A" emissiveIntensity={0.8} metalness={0.9} roughness={0.05} />
-                                </mesh>
-                            </group>
-                        ))}
+                        <mesh>
+                            <boxGeometry args={[2.8, 1.8, 0.08]} />
+                            <meshStandardMaterial color="#0A0A0C" metalness={0.8} roughness={0.2} />
+                        </mesh>
+                        <mesh position={[0, 0, 0.05]}>
+                            <planeGeometry args={[2.6, 1.6]} />
+                            <meshStandardMaterial color="#020617" emissive="#1E3A8A" emissiveIntensity={0.8} metalness={0.9} roughness={0.05} />
+                        </mesh>
                     </group>
                 </group>
             ))}
+
+            {/* Communication Dish */}
             <group position={[0, 1.1, 0.4]} rotation={[Math.PI / 6, 0, 0]}>
                 <mesh>
                     <sphereGeometry args={[0.9, 32, 32, 0, Math.PI * 2, 0, Math.PI / 6]} />
                     <meshStandardMaterial color="#F1F5F9" metalness={0.1} roughness={0.6} side={THREE.DoubleSide} />
                 </mesh>
             </group>
+
+            {/* Thrusters */}
             {[[-0.8, 1.1, 0.8], [0.8, 1.1, 0.8], [-0.8, -1.1, 0.8], [0.8, -1.1, 0.8]].map((pos, i) => (
                 <group key={i} position={pos}>
                     <mesh rotation={[Math.PI / 4, 0, 0]}>
@@ -117,49 +114,80 @@ const SatelliteModel = React.memo(({
 SatelliteModel.displayName = 'SatelliteModel'
 
 /**
- * Autonomous Hovering Satellite
+ * Individual Satellite Instance in Orbit
  */
-function HoveringSatellite({ center, baseRadius, phase, scale }: { center: THREE.Vector3, baseRadius: number, phase: number, scale: number }) {
+function OrbitalSatellite({ 
+    center, 
+    radius, 
+    offset, 
+    scale, 
+    scrollOffset, 
+    isMobile 
+}: { 
+    center: THREE.Vector3, 
+    radius: number, 
+    offset: number, 
+    scale: number, 
+    scrollOffset: React.MutableRefObject<number>,
+    isMobile: boolean
+}) {
     const groupRef = useRef<THREE.Group>(null)
     const pos = useRef(new THREE.Vector3())
     const vel = useRef(new THREE.Vector3())
-    const [hovered, setHovered] = useState(false)
+    const targetPos = useRef(new THREE.Vector3())
+    const [thrusterActive, setThrusterActive] = useState(false)
+    const [isHovered, setIsHovered] = useState(false)
 
-    useFrame((state, delta) => {
-        const t = state.clock.elapsedTime * 0.2 + phase
-        
-        // Complex hovering path (Lissajous-like)
-        const targetX = center.x + Math.cos(t) * baseRadius * 1.2
-        const targetY = center.y + Math.sin(t * 1.5) * 5
-        const targetZ = center.z + Math.sin(t * 0.8) * baseRadius * 0.5
+    useFrame((_state, delta) => {
+        const dt = Math.min(delta, 0.1)
 
-        const target = new THREE.Vector3(targetX, targetY, targetZ)
-        const direction = new THREE.Vector3().copy(target).sub(pos.current)
-        const dist = direction.length()
+        // 1. Target Tracking along fixed orbit
+        const arcRange = isMobile ? Math.PI * 0.4 : Math.PI * 0.6
+        // Each satellite has a different target angle based on shared scroll + fixed offset
+        const targetAngle = (scrollOffset.current * arcRange) - (arcRange / 2) + offset
         
-        // Simple spring-damping for smooth hovering
-        vel.current.add(direction.normalize().multiplyScalar(dist * 0.5 * delta))
-        vel.current.multiplyScalar(0.98) // Damping
+        const tx = center.x + Math.cos(targetAngle) * radius
+        const tz = center.z + Math.sin(targetAngle) * radius
+        targetPos.current.set(tx, 0, tz)
+
+        // 2. Physics (Keep them on the radius)
+        const rVec = new THREE.Vector3().copy(pos.current).sub(center)
+        const rMag = Math.max(rVec.length(), 1)
+        const gravity = rVec.normalize().multiplyScalar(-MU / (rMag * rMag))
         
-        pos.current.add(new THREE.Vector3().copy(vel.current).multiplyScalar(delta * 10))
+        const distToTarget = pos.current.distanceTo(targetPos.current)
+        let thrusting = false
+        
+        if (distToTarget > STATION_KEEPING_THRESHOLD) {
+            thrusting = true
+            const direction = new THREE.Vector3().copy(targetPos.current).sub(pos.current).normalize()
+            vel.current.add(direction.multiplyScalar(THRUSTER_STRENGTH * dt))
+        }
+
+        vel.current.add(gravity.multiplyScalar(dt))
+        pos.current.add(new THREE.Vector3().copy(vel.current).multiplyScalar(dt))
 
         if (groupRef.current) {
             groupRef.current.position.copy(pos.current)
         }
+
+        if (thrusterActive !== thrusting) setThrusterActive(thrusting)
     })
 
     return (
         <group 
             ref={groupRef}
-            onPointerOver={() => setHovered(true)}
-            onPointerOut={() => setHovered(false)}
+            onPointerOver={() => setIsHovered(true)}
+            onPointerOut={() => setIsHovered(false)}
         >
-            <SatelliteModel 
-                thrusterActive={vel.current.length() > 0.5} 
-                alignment={vel.current} 
-                isHovered={hovered} 
-                scale={scale} 
-            />
+            <Trail width={scale * 3} length={15} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
+                <SatelliteModel 
+                    thrusterActive={thrusterActive} 
+                    alignment={vel.current} 
+                    isHovered={isHovered}
+                    scale={scale}
+                />
+            </Trail>
         </group>
     )
 }
@@ -169,30 +197,20 @@ function HoveringSatellite({ center, baseRadius, phase, scale }: { center: THREE
  */
 export default function SatelliteOrbitalScene() {
     const { size } = useThree()
-    const groupRef = useRef<THREE.Group>(null)
-    const lightRef = useRef<THREE.PointLight>(null)
+    const scrollOffset = useRef(0)
     
+    // Responsive settings
     const isMobile = size.width < 768
     const radius = isMobile ? 12 : 18
-    const satScale = isMobile ? 0.7 : 1.2
     const horizontalShift = isMobile ? -5 : -12
     const center = useMemo(() => new THREE.Vector3(horizontalShift, 0, 0), [horizontalShift])
-    
-    // State for main satellite
-    const pos = useRef(new THREE.Vector3(center.x + radius, 0, 0))
-    const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / radius)))
-    const targetPos = useRef(new THREE.Vector3().copy(pos.current))
-    const [thrusterActive, setThrusterActive] = useState(false)
-    const [isHovered, setIsHovered] = useState(false)
-    const scrollOffset = useRef(0)
 
-    // Background Satellites Configuration
-    const bgSatellites = useMemo(() => Array.from({ length: 5 }).map((_, i) => ({
-        id: i,
-        phase: i * (Math.PI * 2 / 5),
-        radius: radius * (0.8 + Math.random() * 0.4),
-        scale: satScale * (0.4 + Math.random() * 0.3)
-    })), [radius, satScale])
+    // Fleet Configuration: 3 Satellites
+    const fleet = useMemo(() => [
+        { id: 1, offset: 0, scale: isMobile ? 0.7 : 1.2 },      // Center
+        { id: 2, offset: -0.4, scale: isMobile ? 0.5 : 0.8 },   // Leading
+        { id: 3, offset: 0.4, scale: isMobile ? 0.5 : 0.8 },    // Trailing
+    ], [isMobile])
     
     useEffect(() => {
         const handleScroll = () => {
@@ -211,40 +229,9 @@ export default function SatelliteOrbitalScene() {
         }
     }, [])
 
-    useFrame((state, delta) => {
-        const dt = Math.min(delta, 0.1)
-
-        // Main Satellite Logic
-        const arcRange = isMobile ? Math.PI * 0.4 : Math.PI * 0.6
-        const targetAngle = (scrollOffset.current * arcRange) - arcRange / 2
-        const tx = center.x + Math.cos(targetAngle) * radius
-        const tz = center.z + Math.sin(targetAngle) * radius
-        targetPos.current.set(tx, 0, tz)
-
-        const rVec = new THREE.Vector3().copy(pos.current).sub(center)
-        const rMag = Math.max(rVec.length(), 1)
-        const gravity = rVec.normalize().multiplyScalar(-MU / (rMag * rMag))
-        
-        const distToTarget = pos.current.distanceTo(targetPos.current)
-        let thrusting = false
-        if (distToTarget > STATION_KEEPING_THRESHOLD) {
-            thrusting = true
-            const direction = new THREE.Vector3().copy(targetPos.current).sub(pos.current).normalize()
-            vel.current.add(direction.multiplyScalar(THRUSTER_STRENGTH * dt))
-        }
-        vel.current.add(gravity.multiplyScalar(dt))
-        pos.current.add(new THREE.Vector3().copy(vel.current).multiplyScalar(dt))
-
-        if (groupRef.current) groupRef.current.position.copy(pos.current)
-
-        if (lightRef.current) {
-            lightRef.current.position.copy(pos.current).add(new THREE.Vector3(2, 5, 5))
-            const intensityMultiplier = 1 + Math.sin(scrollOffset.current * Math.PI) * 2
-            lightRef.current.intensity = 15 * intensityMultiplier
-        }
-
+    useFrame((state) => {
+        // Shared camera focus
         state.camera.lookAt(isMobile ? -2 : -5, 0, 0)
-        if (thrusterActive !== thrusting) setThrusterActive(thrusting)
     })
 
     return (
@@ -253,36 +240,23 @@ export default function SatelliteOrbitalScene() {
             <pointLight position={[50, 50, 50]} intensity={4} color="#FFFFFF" />
             <pointLight position={[-50, -20, -20]} intensity={2} color="#818CF8" />
             
-            <pointLight ref={lightRef} distance={40} decay={2} color="#FFFFFF" />
-
-            {/* Main Satellite */}
-            <group 
-                ref={groupRef}
-                onPointerOver={() => setIsHovered(true)}
-                onPointerOut={() => setIsHovered(false)}
-            >
-                <Trail width={isMobile ? 2 : 4} length={20} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
-                    <SatelliteModel 
-                        thrusterActive={thrusterActive} 
-                        alignment={vel.current} 
-                        isHovered={isHovered}
-                        scale={satScale}
-                    />
-                </Trail>
-            </group>
-
-            {/* Background Hovering Satellites */}
-            {bgSatellites.map((sat) => (
-                <HoveringSatellite 
+            {fleet.map((sat) => (
+                <OrbitalSatellite 
                     key={sat.id}
                     center={center}
-                    baseRadius={sat.radius}
-                    phase={sat.phase}
+                    radius={radius}
+                    offset={sat.offset}
                     scale={sat.scale}
+                    scrollOffset={scrollOffset}
+                    isMobile={isMobile}
                 />
             ))}
 
-            <PerspectiveCamera makeDefault position={isMobile ? [0, 5, 25] : [10, 8, 32]} fov={40} />
+            <PerspectiveCamera 
+                makeDefault 
+                position={isMobile ? [0, 5, 25] : [10, 8, 32]} 
+                fov={isMobile ? 50 : 40} 
+            />
         </>
     )
 }
