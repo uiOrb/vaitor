@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { PerspectiveCamera, Trail, Float } from '@react-three/drei'
+import { PerspectiveCamera, Trail } from '@react-three/drei'
 import * as THREE from 'three'
 import { StarField } from './SpaceScene'
 
@@ -11,16 +11,22 @@ const MU = 150
 const STATION_KEEPING_THRESHOLD = 0.3
 const THRUSTER_STRENGTH = 0.12
 
+interface SurfaceFeature {
+    pos: THREE.Vector3
+    scale: [number, number, number]
+    rotation: [number, number, number]
+    type: 'rock' | 'crater'
+}
+
 /**
  * Ultra-Detailed Procedural Mars
  */
 function Mars({ radius }: { radius: number }) {
     const marsRef = useRef<THREE.Group>(null)
-    const surfaceRef = useRef<THREE.Mesh>(null)
     
     // Generate procedural "rocks" and "craters" once
     const surfaceFeatures = useMemo(() => {
-        const features = []
+        const features: SurfaceFeature[] = []
         // Add pebbles/rocks
         for (let i = 0; i < 40; i++) {
             const phi = Math.acos(-1 + (2 * i) / 40)
@@ -55,7 +61,7 @@ function Mars({ radius }: { radius: number }) {
         return features
     }, [radius])
 
-    useFrame((state, delta) => {
+    useFrame((_state, delta) => {
         if (marsRef.current) {
             marsRef.current.rotation.y += delta * 0.05
         }
@@ -64,7 +70,7 @@ function Mars({ radius }: { radius: number }) {
     return (
         <group ref={marsRef}>
             {/* Main Surface with high segments for light response */}
-            <mesh ref={surfaceRef} castShadow receiveShadow>
+            <mesh castShadow receiveShadow>
                 <sphereGeometry args={[radius, 128, 128]} />
                 <meshStandardMaterial 
                     color="#AA4A30" // Desaturated Rust
@@ -77,14 +83,14 @@ function Mars({ radius }: { radius: number }) {
 
             {/* Geological Features: Rocks and Craters */}
             {surfaceFeatures.map((f, i) => (
-                <group key={i} position={f.pos} rotation={f.rotation as any}>
+                <group key={i} position={f.pos} rotation={f.rotation}>
                     {f.type === 'rock' ? (
-                        <mesh scale={f.scale as any}>
+                        <mesh scale={f.scale}>
                             <dodecahedronGeometry args={[1, 0]} />
                             <meshStandardMaterial color="#7C3A2D" roughness={1} />
                         </mesh>
                     ) : (
-                        <mesh scale={f.scale as any} rotation={[Math.PI / 2, 0, 0]}>
+                        <mesh scale={f.scale} rotation={[Math.PI / 2, 0, 0]}>
                             <torusGeometry args={[1, 0.05, 8, 32]} />
                             <meshStandardMaterial color="#5C2A1F" roughness={1} transparent opacity={0.4} />
                         </mesh>
@@ -123,12 +129,10 @@ function Mars({ radius }: { radius: number }) {
  */
 const SatelliteModel = React.memo(({ 
     thrusterActive, 
-    alignment, 
     isHovered,
     scale = 1
 }: { 
     thrusterActive: boolean, 
-    alignment: THREE.Vector3,
     isHovered: boolean,
     scale?: number
 }) => {
@@ -186,7 +190,7 @@ const SatelliteModel = React.memo(({
                     <meshStandardMaterial color="#F1F5F9" metalness={0.1} roughness={0.6} side={THREE.DoubleSide} />
                 </mesh>
             </group>
-            {[[-0.8, 1.1, 0.8], [0.8, 1.1, 0.8], [-0.8, -1.1, 0.8], [0.8, -1.1, 0.8]].map((p, i) => (
+            {([[-0.8, 1.1, 0.8], [0.8, 1.1, 0.8], [-0.8, -1.1, 0.8], [0.8, -1.1, 0.8]] as [number, number, number][]).map((p, i) => (
                 <group key={i} position={p}>
                     <mesh rotation={[Math.PI / 4, 0, 0]}>
                         <cylinderGeometry args={[0.02, 0.08, 0.2]} />
@@ -205,10 +209,19 @@ const SatelliteModel = React.memo(({
 })
 SatelliteModel.displayName = 'SatelliteModel'
 
+interface OrbitalSatelliteProps {
+    center: THREE.Vector3
+    radius: number
+    offset: number
+    scale: number
+    scrollOffset: React.MutableRefObject<number>
+    isMobile: boolean
+}
+
 /**
  * Individual Satellite Instance in Orbit
  */
-function OrbitalSatellite({ center, radius, offset, scale, scrollOffset, isMobile }: any) {
+function OrbitalSatellite({ center, radius, offset, scale, scrollOffset, isMobile }: OrbitalSatelliteProps) {
     const groupRef = useRef<THREE.Group>(null)
     const pos = useRef(new THREE.Vector3(center.x + radius, 0, 0))
     const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / radius)))
@@ -246,7 +259,7 @@ function OrbitalSatellite({ center, radius, offset, scale, scrollOffset, isMobil
     return (
         <group ref={groupRef} onPointerOver={() => setIsHovered(true)} onPointerOut={() => setIsHovered(false)}>
             <Trail width={scale * 4} length={8} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
-                <SatelliteModel thrusterActive={thrusterActive} alignment={vel.current} isHovered={isHovered} scale={scale} />
+                <SatelliteModel thrusterActive={thrusterActive} isHovered={isHovered} scale={scale} />
             </Trail>
         </group>
     )

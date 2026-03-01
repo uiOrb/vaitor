@@ -7,8 +7,7 @@ const navLinks = [
     { label: 'Origin', href: '#origin' },
     { label: 'Mission', href: '#mission' },
     { label: 'Systems', href: '#systems' },
-    { label: 'Archives', href: '#archives' },
-    { label: 'Transmissions', href: '#transmissions' },
+    { label: 'Archives', href: '#transmissions' },
     { label: 'Contact', href: '#contact' },
 ]
 

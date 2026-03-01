@@ -53,4 +53,13 @@ describe('Navbar', () => {
         fireEvent.click(link)
         fireEvent.mouseLeave(link)
     })
+    
+    it('contains correctly mapped navigation links', () => {
+        render(<Navbar />)
+        expect(screen.getByText('Origin')).toBeInTheDocument()
+        expect(screen.getAllByText('Mission')[0]).toBeInTheDocument()
+        expect(screen.getByText('Systems')).toBeInTheDocument()
+        expect(screen.getByText('Archives')).toBeInTheDocument()
+        expect(screen.getByText('Contact')).toBeInTheDocument()
+    })
 })

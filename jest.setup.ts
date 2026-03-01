@@ -37,4 +37,4 @@ HTMLCanvasElement.prototype.getContext = jest.fn((contextId: string) => {
         } as unknown as CanvasRenderingContext2D
     }
     return null
-})
+}) as any

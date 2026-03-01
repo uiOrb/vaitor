@@ -246,6 +246,11 @@ p {
   color: var(--color-star-white);
 }
 
+/* === SCROLL ANCHORING === */
+#origin, #mission, #systems, #transmissions, #contact {
+  scroll-margin-top: 80px;
+}
+
 /* === MOBILE === */
 @media (max-width: 768px) {
   h1 {
