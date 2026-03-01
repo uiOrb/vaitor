@@ -1,6 +1,5 @@
 'use client'
-
-import { Suspense } from 'react'
+import { Suspense, useRef, useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import ScrollReveal from '../ScrollReveal'
 
@@ -14,9 +13,43 @@ const categories = [
 ]
 
 export default function SkillsSection() {
+    const sectionRef = useRef<HTMLElement>(null)
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+    const [opacity, setOpacity] = useState(0)
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!sectionRef.current) return
+            const rect = sectionRef.current.getBoundingClientRect()
+            setMousePos({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+            })
+        }
+
+        const handleMouseEnter = () => setOpacity(1)
+        const handleMouseLeave = () => setOpacity(0)
+
+        const el = sectionRef.current
+        if (el) {
+            el.addEventListener('mousemove', handleMouseMove)
+            el.addEventListener('mouseenter', handleMouseEnter)
+            el.addEventListener('mouseleave', handleMouseLeave)
+        }
+
+        return () => {
+            if (el) {
+                el.removeEventListener('mousemove', handleMouseMove)
+                el.removeEventListener('mouseenter', handleMouseEnter)
+                el.removeEventListener('mouseleave', handleMouseLeave)
+            }
+        }
+    }, [])
+
     return (
         <section
             id="systems"
+            ref={sectionRef}
             className="section"
             style={{
                 background: '#09090B',
@@ -25,20 +58,34 @@ export default function SkillsSection() {
                 minHeight: '100vh',
             }}
         >
-            {/* Star field background */}
+            {/* Grid Background */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundImage:
-                        'radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px)',
-                    backgroundSize: '50px 50px',
-                    opacity: 0.3,
+                    backgroundImage: `
+                        linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px',
                     pointerEvents: 'none',
                 }}
             />
 
-            <div className="section-inner">
+            {/* Spotlight Overlay */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.08), transparent 80%)`,
+                    opacity: opacity,
+                    transition: 'opacity 0.5s ease',
+                    pointerEvents: 'none',
+                }}
+            />
+
+            <div className="section-inner" style={{ position: 'relative', zIndex: 1 }}>
+...
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>

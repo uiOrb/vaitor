@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import ScrollReveal from '../ScrollReveal'
 import Image from 'next/image'
@@ -226,9 +226,43 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
 }
 
 export default function CertificationSection() {
+    const sectionRef = useRef<HTMLElement>(null)
+    const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+    const [opacity, setOpacity] = useState(0)
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!sectionRef.current) return
+            const rect = sectionRef.current.getBoundingClientRect()
+            setMousePos({
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top,
+            })
+        }
+
+        const handleMouseEnter = () => setOpacity(1)
+        const handleMouseLeave = () => setOpacity(0)
+
+        const el = sectionRef.current
+        if (el) {
+            el.addEventListener('mousemove', handleMouseMove)
+            el.addEventListener('mouseenter', handleMouseEnter)
+            el.addEventListener('mouseleave', handleMouseLeave)
+        }
+
+        return () => {
+            if (el) {
+                el.removeEventListener('mousemove', handleMouseMove)
+                el.removeEventListener('mouseenter', handleMouseEnter)
+                el.removeEventListener('mouseleave', handleMouseLeave)
+            }
+        }
+    }, [])
+
     return (
         <section
             id="archives"
+            ref={sectionRef}
             className="section"
             style={{
                 background: '#09090B',
@@ -236,21 +270,33 @@ export default function CertificationSection() {
                 overflow: 'hidden',
             }}
         >
-            {/* Ambient subtle light */}
+            {/* Grid Background */}
             <div
                 style={{
                     position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '80%',
-                    height: '80%',
-                    background: 'radial-gradient(circle, rgba(99,102,241,0.03) 0%, transparent 70%)',
+                    inset: 0,
+                    backgroundImage: `
+                        linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px',
                     pointerEvents: 'none',
                 }}
             />
 
-            <div className="section-inner">
+            {/* Spotlight Overlay */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.08), transparent 80%)`,
+                    opacity: opacity,
+                    transition: 'opacity 0.5s ease',
+                    pointerEvents: 'none',
+                }}
+            />
+
+            <div className="section-inner" style={{ position: 'relative', zIndex: 1 }}>
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>
