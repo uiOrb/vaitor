@@ -19,8 +19,8 @@ const projects = [
         id: 2,
         title: 'gRPC Microservices Platform',
         description:
-            'Production-grade gRPC service mesh with Python, featuring bidirectional streaming, service discovery, TLS authentication, and comprehensive observability with distributed tracing.',
-        tech: ['gRPC', 'Python', 'Docker', 'Kubernetes', 'Prometheus'],
+            'Production-grade gRPC service mesh with Go, featuring bidirectional streaming, service discovery, TLS authentication, and comprehensive observability with distributed tracing.',
+        tech: ['gRPC', 'Go', 'Docker', 'Kubernetes', 'Prometheus'],
         color: '#6EE7B7',
         status: 'Completed',
         link: 'https://github.com/apiOrb/gRCP-crash-course',
