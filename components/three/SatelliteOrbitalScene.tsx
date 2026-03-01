@@ -57,84 +57,170 @@ function SatelliteModel({
 
     return (
         <group ref={group} scale={[scale, scale, scale]}>
-            {/* Main Bus - Octagonal core */}
-            <mesh castShadow receiveShadow>
-                <cylinderGeometry args={[0.8, 0.9, 2, 8]} />
-                <meshStandardMaterial color="#27272A" metalness={0.9} roughness={0.2} />
-            </mesh>
-
-            {/* Scientific Instrument Deck */}
-            <mesh position={[0, 1.1, 0]}>
-                <boxGeometry args={[1.2, 0.4, 1.2]} />
-                <meshStandardMaterial color="#3F3F46" metalness={0.8} roughness={0.3} />
-            </mesh>
-            
-            {/* Gold Foil Wrap - Stronger Emissive for Visibility */}
-            <mesh position={[0, -0.2, 0]} scale={[1.02, 1.02, 1.02]}>
-                <cylinderGeometry args={[0.82, 0.82, 1.2, 8]} />
-                <meshStandardMaterial 
-                    color="#D4AF37" 
-                    metalness={1} 
-                    roughness={0.1} 
-                    emissive="#FFD700" 
-                    emissiveIntensity={0.6} 
-                />
-            </mesh>
-
-            {/* High-Gain Antenna Array */}
-            <group position={[0, 1.4, 0]}>
-                <mesh rotation={[-Math.PI / 6, 0, 0]}>
-                    <sphereGeometry args={[0.7, 32, 32, 0, Math.PI * 2, 0, Math.PI / 4]} />
-                    <meshStandardMaterial color="#F5F5F7" metalness={0.9} roughness={0.1} side={THREE.DoubleSide} />
+            {/* Central Bus: Beveled Rectangular Prism (Graphite Gray Alloy) */}
+            <group>
+                {/* Main Hull */}
+                <mesh castShadow receiveShadow>
+                    <boxGeometry args={[1.6, 2.2, 1.6]} />
+                    <meshStandardMaterial 
+                        color="#2D2D30" 
+                        metalness={0.7} 
+                        roughness={0.4} 
+                        emissive="#000000"
+                    />
                 </mesh>
-                <mesh position={[0, 0.4, 0.2]} rotation={[-Math.PI / 6, 0, 0]}>
-                    <cylinderGeometry args={[0.02, 0.05, 0.4]} />
-                    <meshStandardMaterial color="#A1A1AA" metalness={1} />
+                {/* Chamfered Edges / Bevel Details */}
+                {[[-0.8, -0.8], [0.8, -0.8], [-0.8, 0.8], [0.8, 0.8]].map(([x, z], i) => (
+                    <mesh key={i} position={[x, 0, z]}>
+                        <cylinderGeometry args={[0.05, 0.05, 2.2, 8]} />
+                        <meshStandardMaterial color="#1A1A1C" metalness={0.9} roughness={0.2} />
+                    </mesh>
+                ))}
+                {/* Panel Seams & Fasteners (Subtle stippled cylinders) */}
+                <mesh position={[0, 0, 0.81]}>
+                    <planeGeometry args={[1.4, 2]} />
+                    <meshBasicMaterial color="#111111" wireframe transparent opacity={0.1} />
                 </mesh>
             </group>
 
-            {/* Advanced Solar Arrays - Bright Blue Emissive */}
+            {/* Layered MLI Insulation (Gold/Kapton Foil blankets) */}
+            <group position={[0, -0.4, 0]}>
+                <mesh scale={[1.02, 0.6, 1.02]}>
+                    <boxGeometry args={[1.6, 1, 1.6]} />
+                    <meshStandardMaterial 
+                        color="#D4AF37" 
+                        metalness={1} 
+                        roughness={0.3} 
+                        emissive="#443300" 
+                        emissiveIntensity={0.4}
+                    />
+                </mesh>
+                {/* Slightly crinkled secondary layer */}
+                <mesh scale={[1.03, 0.5, 1.03]} position={[0, -0.1, 0]}>
+                    <octahedronGeometry args={[0.9, 2]} />
+                    <meshStandardMaterial 
+                        color="#B8860B" 
+                        metalness={1} 
+                        roughness={0.5} 
+                        transparent 
+                        opacity={0.8}
+                    />
+                </mesh>
+            </group>
+
+            {/* Articulated Solar Arrays */}
             {[-1, 1].map((side) => (
-                <group key={side} position={[side * 0.9, 0, 0]}>
-                    <mesh rotation={[0, 0, Math.PI / 2]} position={[side * 0.5, 0, 0]}>
-                        <cylinderGeometry args={[0.08, 0.05, 1]} />
-                        <meshStandardMaterial color="#71717A" metalness={1} />
+                <group key={side} position={[side * 0.8, 0, 0]}>
+                    {/* Articulated Hinge & Actuator */}
+                    <mesh rotation={[0, 0, Math.PI / 2]} position={[side * 0.2, 0, 0]}>
+                        <cylinderGeometry args={[0.15, 0.15, 0.4, 16]} />
+                        <meshStandardMaterial color="#52525B" metalness={0.9} roughness={0.1} />
                     </mesh>
-                    
-                    <group position={[side * 2.5, 0, 0]}>
-                        <mesh>
-                            <boxGeometry args={[4, 1.4, 0.08]} />
-                            <meshStandardMaterial color="#18181B" metalness={0.5} roughness={0.5} />
-                        </mesh>
-                        <mesh position={[0, 0, 0.05]}>
-                            <planeGeometry args={[3.8, 1.2]} />
-                            <meshStandardMaterial 
-                                color="#2563EB" 
-                                emissive="#3B82F6" 
-                                emissiveIntensity={1.2} 
-                                metalness={0.9} 
-                                roughness={0.1} 
-                            />
-                        </mesh>
+                    <mesh position={[side * 0.4, 0, 0.1]}>
+                        <boxGeometry args={[0.1, 0.3, 0.2]} />
+                        <meshStandardMaterial color="#3F3F46" />
+                    </mesh>
+
+                    {/* Main Array Structure */}
+                    <group position={[side * 3.2, 0, 0]}>
+                        {/* Panel Segments */}
+                        {[[-1.5, 0], [1.5, 0]].map(([px, pz], idx) => (
+                            <group key={idx} position={[px, pz, 0]}>
+                                {/* Grid Foundation */}
+                                <mesh>
+                                    <boxGeometry args={[2.8, 1.8, 0.08]} />
+                                    <meshStandardMaterial color="#0A0A0C" metalness={0.8} roughness={0.2} />
+                                </mesh>
+                                {/* Photovoltaic Cells (Deep Blue-Black) */}
+                                <mesh position={[0, 0, 0.05]}>
+                                    <planeGeometry args={[2.6, 1.6]} />
+                                    <meshStandardMaterial 
+                                        color="#020617" 
+                                        emissive="#1E3A8A" 
+                                        emissiveIntensity={0.8} 
+                                        metalness={0.9} 
+                                        roughness={0.05} 
+                                    />
+                                </mesh>
+                                {/* Silver Conductor Lines */}
+                                <mesh position={[0, 0, 0.06]}>
+                                    <planeGeometry args={[2.6, 1.6]} />
+                                    <meshBasicMaterial color="#E2E8F0" wireframe transparent opacity={0.2} />
+                                </mesh>
+                            </group>
+                        ))}
                     </group>
                 </group>
             ))}
 
-            {/* RCS Thrusters */}
-            {[[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([x, z], idx) => (
-                <group key={idx} position={[x * 0.6, -0.8, z * 0.6]}>
-                    <mesh>
-                        <boxGeometry args={[0.2, 0.2, 0.2]} />
-                        <meshStandardMaterial color="#3F3F46" />
+            {/* Primary Communication Dish (Ceramic White Parabolic) */}
+            <group position={[0, 1.1, 0.4]} rotation={[Math.PI / 6, 0, 0]}>
+                {/* Gimbal Mount */}
+                <mesh position={[0, -0.2, -0.2]}>
+                    <sphereGeometry args={[0.2, 16, 16]} />
+                    <meshStandardMaterial color="#71717A" metalness={1} />
+                </mesh>
+                {/* Dish */}
+                <mesh>
+                    <sphereGeometry args={[0.9, 32, 32, 0, Math.PI * 2, 0, Math.PI / 6]} />
+                    <meshStandardMaterial color="#F1F5F9" metalness={0.1} roughness={0.6} side={THREE.DoubleSide} />
+                </mesh>
+                {/* Central Feed Horn */}
+                <mesh position={[0, 0.5, 0]}>
+                    <cylinderGeometry args={[0.02, 0.08, 0.6]} />
+                    <meshStandardMaterial color="#94A3B8" metalness={1} />
+                </mesh>
+            </group>
+
+            {/* Optical Instruments (Telescope / Sensors) */}
+            <group position={[0.5, 1.1, -0.5]}>
+                <mesh rotation={[Math.PI / 2, 0, 0]}>
+                    <cylinderGeometry args={[0.3, 0.35, 0.8, 16]} />
+                    <meshStandardMaterial color="#18181B" metalness={0.9} roughness={0.1} />
+                </mesh>
+                {/* Dark Lens with Anti-Reflective Coating */}
+                <mesh position={[0, 0, -0.41]} rotation={[Math.PI / 2, 0, 0]}>
+                    <circleGeometry args={[0.25, 32]} />
+                    <meshStandardMaterial 
+                        color="#0F172A" 
+                        emissive="#4C1D95" 
+                        emissiveIntensity={0.5} 
+                        metalness={1} 
+                        roughness={0} 
+                    />
+                </mesh>
+            </group>
+
+            {/* Star Tracker Boxy Casings */}
+            {[[-0.4, 0.4], [0.4, 0.4]].map(([x, y], i) => (
+                <mesh key={i} position={[x, 1.1, -0.7]}>
+                    <boxGeometry args={[0.2, 0.2, 0.2]} />
+                    <meshStandardMaterial color="#3F3F46" />
+                </mesh>
+            ))}
+
+            {/* Reaction Control System (RCS) Clusters */}
+            {[[-0.8, 1.1, 0.8], [0.8, 1.1, 0.8], [-0.8, -1.1, 0.8], [0.8, -1.1, 0.8]].map((pos, i) => (
+                <group key={i} position={pos}>
+                    {/* Metallic Nozzles with scorched rims */}
+                    <mesh rotation={[Math.PI / 4, 0, 0]}>
+                        <cylinderGeometry args={[0.02, 0.08, 0.2]} />
+                        <meshStandardMaterial color="#475569" metalness={1} roughness={0.3} />
                     </mesh>
                     {thrusterActive && (
-                        <mesh position={[0, -0.2, 0]}>
-                            <coneGeometry args={[0.08, 0.4, 8]} />
-                            <meshBasicMaterial color="#60A5FA" transparent opacity={0.9} />
+                        <mesh position={[0, 0.1, 0.1]}>
+                            <coneGeometry args={[0.05, 0.4, 8]} />
+                            <meshBasicMaterial color="#60A5FA" transparent opacity={0.8} />
                         </mesh>
                     )}
                 </group>
             ))}
+
+            {/* External Wiring Harnesses (Subtle detail) */}
+            <mesh position={[0.81, 0, 0]}>
+                <cylinderGeometry args={[0.01, 0.01, 1.8]} />
+                <meshBasicMaterial color="#FFD700" />
+            </mesh>
         </group>
     )
 }
@@ -150,7 +236,7 @@ export default function SatelliteOrbitalScene() {
     // Responsive settings
     const isMobile = size.width < 768
     const radius = isMobile ? 12 : 18
-    const satScale = isMobile ? 0.7 : 1.2 // Increased scale
+    const satScale = isMobile ? 0.7 : 1.2
     const horizontalShift = isMobile ? -5 : -12
     
     const center = useMemo(() => new THREE.Vector3(horizontalShift, 0, 0), [horizontalShift])
@@ -214,10 +300,8 @@ export default function SatelliteOrbitalScene() {
         }
 
         // 4. Satellite "Spotlight" Logic
-        // As it scrolls near components, boost the light intensity
         if (lightRef.current) {
             lightRef.current.position.copy(pos.current).add(new THREE.Vector3(2, 5, 5))
-            // Peak intensity when scroll is around 0.5 (center of experience section)
             const intensityMultiplier = 1 + Math.sin(scrollOffset.current * Math.PI) * 2
             lightRef.current.intensity = 15 * intensityMultiplier
         }
@@ -230,11 +314,10 @@ export default function SatelliteOrbitalScene() {
 
     return (
         <>
-            <ambientLight intensity={1.5} /> {/* High base ambient light */}
+            <ambientLight intensity={1.5} />
             <pointLight position={[50, 50, 50]} intensity={4} color="#FFFFFF" />
             <pointLight position={[-50, -20, -20]} intensity={2} color="#818CF8" />
             
-            {/* Dynamic Follow Light (The "Spotlight" that shines on it near components) */}
             <pointLight 
                 ref={lightRef} 
                 distance={40} 
