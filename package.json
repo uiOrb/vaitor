@@ -16,6 +16,7 @@
     "@react-three/fiber": "^8.17.10",
     "@types/nodemailer": "^7.0.11",
     "@types/three": "^0.170.0",
+    "@vercel/analytics": "^1.6.1",
     "framer-motion": "^12.34.3",
     "mailtrap": "^4.4.0",
     "next": "14.2.35",
