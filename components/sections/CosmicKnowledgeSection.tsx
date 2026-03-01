@@ -1,10 +1,20 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { Suspense, useRef, useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { motion } from 'framer-motion'
-import ScrollReveal from '../ScrollReveal'
 import Image from 'next/image'
+import ScrollReveal from '../ScrollReveal'
 import CosmicBackground from './CosmicBackground'
+
+const SkillsCanvas = dynamic(() => import('../SkillsCanvas'), { ssr: false })
+
+const categories = [
+    { name: 'Languages', color: '#818CF8', items: ['Python', 'TypeScript', 'Go', 'Bash'] },
+    { name: 'Frameworks', color: '#6EE7B7', items: ['Next.js', 'React', 'Node.js', 'gRPC'] },
+    { name: 'DevOps', color: '#FCD34D', items: ['Kubernetes', 'Docker', 'Terraform', 'GitHub Actions'] },
+    { name: 'Cloud', color: '#60A5FA', items: ['Azure', 'AKS', 'Backstage', 'Azure Local'] },
+]
 
 const certifications = [
     {
@@ -67,13 +77,13 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                         transformStyle: 'preserve-3d',
                     }}
                 >
-                    {/* Front Side */}
                     <div
                         style={{
                             position: 'absolute',
                             inset: 0,
                             backfaceVisibility: 'hidden',
-                            background: '#18181B',
+                            background: 'rgba(24, 24, 27, 0.8)',
+                            backdropFilter: 'blur(12px)',
                             borderRadius: '20px',
                             border: '1px solid rgba(255,255,255,0.06)',
                             padding: '32px',
@@ -85,7 +95,6 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                             overflow: 'hidden',
                         }}
                     >
-                        {/* Background glow */}
                         <div
                             style={{
                                 position: 'absolute',
@@ -97,77 +106,23 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                                 pointerEvents: 'none',
                             }}
                         />
-
-                        <div
-                            style={{
-                                position: 'relative',
-                                width: '140px',
-                                height: '140px',
-                                marginBottom: '24px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <Image
-                                src={cert.badge}
-                                alt={cert.title}
-                                width={140}
-                                height={140}
-                                style={{ objectFit: 'contain' }}
-                            />
+                        <div style={{ position: 'relative', width: '140px', height: '140px', marginBottom: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Image src={cert.badge} alt={cert.title} width={140} height={140} style={{ objectFit: 'contain' }} />
                         </div>
-
                         <div style={{ height: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <h3
-                                style={{
-                                    fontSize: '17px',
-                                    fontWeight: 600,
-                                    color: '#F5F5F7',
-                                    marginBottom: '6px',
-                                    lineHeight: '1.3',
-                                }}
-                            >
-                                {cert.title}
-                            </h3>
-                            <p
-                                style={{
-                                    fontSize: '12px',
-                                    color: '#A1A1AA',
-                                    letterSpacing: '0.05em',
-                                    textTransform: 'uppercase',
-                                    fontWeight: 500,
-                                }}
-                            >
-                                {cert.org}
-                            </p>
+                            <h3 style={{ fontSize: '17px', fontWeight: 600, color: '#F5F5F7', marginBottom: '6px', lineHeight: '1.3' }}>{cert.title}</h3>
+                            <p style={{ fontSize: '12px', color: '#A1A1AA', letterSpacing: '0.05em', textTransform: 'uppercase', fontWeight: 500 }}>{cert.org}</p>
                         </div>
-
-                        <div
-                            style={{
-                                marginTop: '16px',
-                                fontSize: '10px',
-                                color: cert.color,
-                                border: `1px solid ${cert.color}44`,
-                                padding: '4px 12px',
-                                borderRadius: '100px',
-                                fontWeight: 600,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.1em',
-                            }}
-                        >
-                            Tap to flip
-                        </div>
+                        <div style={{ marginTop: '16px', fontSize: '10px', color: cert.color, border: `1px solid ${cert.color}44`, padding: '4px 12px', borderRadius: '100px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Tap to flip</div>
                     </div>
-
-                    {/* Back Side */}
                     <div
                         style={{
                             position: 'absolute',
                             inset: 0,
                             backfaceVisibility: 'hidden',
                             transform: 'rotateY(180deg)',
-                            background: '#1E1E26',
+                            background: 'rgba(30, 30, 38, 0.9)',
+                            backdropFilter: 'blur(12px)',
                             borderRadius: '20px',
                             border: `1px solid ${cert.color}44`,
                             padding: '32px',
@@ -177,47 +132,12 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                         }}
                     >
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <h4
-                                style={{
-                                    fontSize: '13px',
-                                    fontWeight: 600,
-                                    color: cert.color,
-                                    marginBottom: '16px',
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '0.1em',
-                                    textAlign: 'left',
-                                }}
-                            >
-                                Achievement Log
-                            </h4>
-                            <p
-                                style={{
-                                    fontSize: '15px',
-                                    lineHeight: '1.6',
-                                    color: '#D4D4D8',
-                                    fontStyle: 'italic',
-                                    fontFamily: 'DM Serif Display, serif',
-                                    textAlign: 'left',
-                                }}
-                            >
-                                &ldquo;{cert.experience}&rdquo;
-                            </p>
+                            <h4 style={{ fontSize: '13px', fontWeight: 600, color: cert.color, marginBottom: '16px', textTransform: 'uppercase', letterSpacing: '0.1em', textAlign: 'left' }}>Achievement Log</h4>
+                            <p style={{ fontSize: '15px', lineHeight: '1.6', color: '#D4D4D8', fontStyle: 'italic', fontFamily: 'DM Serif Display, serif', textAlign: 'left' }}>&ldquo;{cert.experience}&rdquo;</p>
                         </div>
-                        
-                        <div
-                            style={{
-                                marginTop: 'auto',
-                                paddingTop: '20px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '8px',
-                                opacity: 0.6,
-                            }}
-                        >
+                        <div style={{ marginTop: 'auto', paddingTop: '20px', display: 'flex', alignItems: 'center', gap: '8px', opacity: 0.6 }}>
                             <div style={{ width: '24px', height: '1px', background: cert.color, flexShrink: 0 }} />
-                            <span style={{ fontSize: '9px', color: '#A1A1AA', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Verification Signal Active
-                            </span>
+                            <span style={{ fontSize: '9px', color: '#A1A1AA', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Verification Signal Active</span>
                         </div>
                     </div>
                 </motion.div>
@@ -226,7 +146,7 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
     )
 }
 
-export default function CertificationSection() {
+export default function CosmicKnowledgeSection() {
     const sectionRef = useRef<HTMLElement>(null)
     const [opacity, setOpacity] = useState(0)
 
@@ -239,17 +159,14 @@ export default function CertificationSection() {
             sectionRef.current.style.setProperty('--mouse-x', `${x}px`)
             sectionRef.current.style.setProperty('--mouse-y', `${y}px`)
         }
-
         const handleMouseEnter = () => setOpacity(1)
         const handleMouseLeave = () => setOpacity(0)
-
         const el = sectionRef.current
         if (el) {
             el.addEventListener('mousemove', handleMouseMove)
             el.addEventListener('mouseenter', handleMouseEnter)
             el.addEventListener('mouseleave', handleMouseLeave)
         }
-
         return () => {
             if (el) {
                 el.removeEventListener('mousemove', handleMouseMove)
@@ -261,36 +178,26 @@ export default function CertificationSection() {
 
     return (
         <section
-            id="archives"
             ref={sectionRef}
-            className="section spotlight-section"
+            className="spotlight-section"
             style={{
                 background: '#050508',
                 position: 'relative',
                 overflow: 'hidden',
+                padding: 'var(--space-2xl) 0',
             }}
         >
             <CosmicBackground />
 
-            {/* Nebula Glows (Ambient) */}
-            <div
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: `
-                        radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
-                        radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)
-                    `,
-                    pointerEvents: 'none',
-                }}
-            />
+            {/* Ambient Nebula */}
+            <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
-            {/* Spotlight Overlay (Additional soft glow) */}
+            {/* Mouse Spotlight */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.04), transparent 80%)`,
+                    background: `radial-gradient(800px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.04), transparent 80%)`,
                     opacity: opacity,
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',
@@ -298,44 +205,80 @@ export default function CertificationSection() {
             />
 
             <div className="section-inner" style={{ position: 'relative', zIndex: 1 }}>
-                {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '80px' }}>
-                    <ScrollReveal>
-                        <p className="section-label">CHAPTER 04 · CREDENTIAL ARCHIVES</p>
-                    </ScrollReveal>
+                {/* 1. SKILLS SUB-SECTION */}
+                <div id="systems" style={{ marginBottom: '160px' }}>
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <ScrollReveal>
+                            <p className="section-label">CHAPTER 03 · SYSTEMS ONLINE</p>
+                        </ScrollReveal>
+                        <ScrollReveal delay={100}>
+                            <h2>The stack that powers the mission.</h2>
+                        </ScrollReveal>
+                    </div>
+
                     <ScrollReveal delay={100}>
-                        <h2>Validated skills. Tested in the field.</h2>
+                        <div
+                            className="skills-canvas-container"
+                            style={{
+                                width: '100%',
+                                height: '500px',
+                                borderRadius: '16px',
+                                overflow: 'hidden',
+                                border: '1px solid rgba(255,255,255,0.06)',
+                                background: 'rgba(9,9,11,0.4)',
+                                backdropFilter: 'blur(4px)',
+                                position: 'relative',
+                            }}
+                        >
+                            <Suspense fallback={<div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#A1A1AA' }}>Loading constellation…</div>}>
+                                <SkillsCanvas />
+                            </Suspense>
+                        </div>
+                    </ScrollReveal>
+
+                    <ScrollReveal delay={200}>
+                        <div className="skills-legend" style={{ display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '32px', marginTop: '48px' }}>
+                            {categories.map((cat) => (
+                                <div key={cat.name} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: cat.color, boxShadow: `0 0 8px ${cat.color}` }} />
+                                    <span style={{ fontSize: '13px', color: '#A1A1AA', fontWeight: 500 }}>{cat.name}</span>
+                                    <span style={{ fontSize: '12px', color: 'rgba(161,161,170,0.5)' }}>({cat.items.join(', ')})</span>
+                                </div>
+                            ))}
+                        </div>
                     </ScrollReveal>
                 </div>
 
-                {/* Grid */}
-                <div
-                    className="cert-grid"
-                    style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(4, 1fr)',
-                        gap: '24px',
-                    }}
-                >
-                    {certifications.map((cert, i) => (
-                        <CertificationCard key={cert.id} cert={cert} index={i} />
-                    ))}
+                {/* 2. CERTIFICATION SUB-SECTION */}
+                <div id="archives">
+                    <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+                        <ScrollReveal>
+                            <p className="section-label">CHAPTER 04 · CREDENTIAL ARCHIVES</p>
+                        </ScrollReveal>
+                        <ScrollReveal delay={100}>
+                            <h2>Validated skills. Tested in the field.</h2>
+                        </ScrollReveal>
+                    </div>
+
+                    <div className="cert-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+                        {certifications.map((cert, i) => (
+                            <CertificationCard key={cert.id} cert={cert} index={i} />
+                        ))}
+                    </div>
                 </div>
             </div>
 
             <style jsx global>{`
                 @media (max-width: 1200px) {
-                    .cert-grid {
-                        grid-template-columns: repeat(2, 1fr) !important;
-                    }
+                    .cert-grid { grid-template-columns: repeat(2, 1fr) !important; }
+                }
+                @media (max-width: 768px) {
+                    .skills-canvas-container { height: 350px !important; }
+                    .skills-legend { gap: 16px !important; justify-content: flex-start !important; }
                 }
                 @media (max-width: 640px) {
-                    .cert-grid {
-                        grid-template-columns: 1fr !important;
-                    }
-                    .cert-card-container {
-                        height: 340px !important;
-                    }
+                    .cert-grid { grid-template-columns: 1fr !important; }
+                    .cert-card-container { height: 340px !important; }
                 }
             `}</style>
         </section>
