@@ -1,18 +1,17 @@
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import ContactSection from '@/components/sections/ContactSection'
 
-// Use absolute path for mocking
+// Mock ScrollReveal
 jest.mock('@/components/ScrollReveal', () => ({ children }: any) => <div data-testid="scroll-reveal">{children}</div>)
 
 // Mock Framer Motion
 jest.mock('framer-motion', () => ({
     motion: {
         div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-        h2: ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
         form: ({ children, ...props }: any) => <form {...props}>{children}</form>,
         path: ({ children, ...props }: any) => <path {...props}>{children}</path>,
     },
-    AnimatePresence: ({ children }: any) => <div data-testid="animate-presence">{children}</div>,
+    AnimatePresence: ({ children }: any) => <>{children}</>,
 }))
 
 // Mock fetch
@@ -20,80 +19,96 @@ global.fetch = jest.fn()
 
 describe('ContactSection', () => {
     beforeEach(() => {
-        jest.clearAllMocks()
+        (global.fetch as jest.Mock).mockClear()
+        jest.spyOn(console, 'error').mockImplementation(() => {})
     })
 
-    it('renders the contact form and labels', () => {
+    afterEach(() => {
+        jest.restoreAllMocks()
+    })
+
+    it('renders the form correctly', () => {
         render(<ContactSection />)
-
-        expect(screen.getByText(/CHAPTER 06 · OPEN CHANNEL/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Name/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Email/i)).toBeInTheDocument()
-        expect(screen.getByLabelText(/Message/i)).toBeInTheDocument()
+        expect(screen.getByText('Establish contact.')).toBeInTheDocument()
     })
 
-    it('submits the form successfully', async () => {
-        ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+    it('handles successful submission', async () => {
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: true,
             json: async () => ({ success: true }),
         })
 
         render(<ContactSection />)
-
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } })
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } })
-        fireEvent.change(screen.getByLabelText(/Message/i), { target: { value: 'Hello!' } })
-
-        const submitBtn = screen.getByText(/SEND TRANSMISSION/i)
-        fireEvent.click(submitBtn)
-
-        await waitFor(() => {
-            expect(screen.getByText(/Transmission received/i)).toBeInTheDocument()
-        })
+        
+        fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'John' } })
+        fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Hello' } })
+        
+        fireEvent.click(screen.getByText('SEND TRANSMISSION'))
+        
+        await waitFor(() => expect(screen.getByText('Transmitting…')).toBeInTheDocument())
+        await waitFor(() => expect(screen.getByText('Transmission received.')).toBeInTheDocument())
     })
 
-    it('handles form submission error', async () => {
-        const errorText = 'API Failure'
-        ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+    it('handles API error submission', async () => {
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
             ok: false,
-            json: async () => ({ error: errorText }),
+            json: async () => ({ error: 'Server error' }),
         })
 
         render(<ContactSection />)
+        
+        fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'John' } })
+        fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Hello' } })
 
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } })
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } })
-        fireEvent.change(screen.getByLabelText(/Message/i), { target: { value: 'Hello!' } })
-
-        fireEvent.click(screen.getByText(/SEND TRANSMISSION/i))
-
-        await waitFor(() => {
-            expect(screen.getByText(errorText)).toBeInTheDocument()
-        })
+        fireEvent.click(screen.getByText('SEND TRANSMISSION'))
+        
+        await waitFor(() => expect(screen.getByText('Server error')).toBeInTheDocument())
     })
 
-    it('shows loading state during submission', async () => {
-        let resolveFetch: any
-        const fetchPromise = new Promise((resolve) => {
-            resolveFetch = resolve
+    it('handles default API error submission', async () => {
+        (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({}), // No error message
         })
-        ; (global.fetch as jest.Mock).mockReturnValue(fetchPromise)
 
         render(<ContactSection />)
+        
+        fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'John' } })
+        fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Hello' } })
 
-        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } })
-        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } })
-        fireEvent.change(screen.getByLabelText(/Message/i), { target: { value: 'Hello!' } })
+        fireEvent.click(screen.getByText('SEND TRANSMISSION'))
+        
+        await waitFor(() => expect(screen.getByText('Something went wrong')).toBeInTheDocument())
+    })
 
-        fireEvent.click(screen.getByText(/SEND TRANSMISSION/i))
+    it('handles network exception', async () => {
+        (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network error'))
 
-        expect(screen.getByText(/Transmitting/i)).toBeInTheDocument()
+        render(<ContactSection />)
+        
+        fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'John' } })
+        fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Hello' } })
 
-        await act(async () => {
-            resolveFetch({
-                ok: true,
-                json: async () => ({ success: true }),
-            })
-        })
+        fireEvent.click(screen.getByText('SEND TRANSMISSION'))
+        
+        await waitFor(() => expect(screen.getByText('Network error')).toBeInTheDocument())
+    })
+    
+    it('handles unknown exception', async () => {
+        (global.fetch as jest.Mock).mockRejectedValueOnce('Unknown error')
+
+        render(<ContactSection />)
+        
+        fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'John' } })
+        fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Hello' } })
+
+        fireEvent.click(screen.getByText('SEND TRANSMISSION'))
+        
+        await waitFor(() => expect(screen.getByText('Connection failed. Try again.')).toBeInTheDocument())
     })
 })

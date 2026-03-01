@@ -216,7 +216,15 @@ export default function ExperienceSection() {
         >
             <ExperienceCanvas />
 
-            <div className="section-inner" style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to bottom, #09090B 0%, transparent 10%, transparent 90%, #09090B 100%)',
+                zIndex: 1,
+                pointerEvents: 'none'
+            }} />
+
+            <div className="section-inner" style={{ position: 'relative', zIndex: 10 }}>
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>

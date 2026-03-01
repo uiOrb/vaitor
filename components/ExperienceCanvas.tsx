@@ -17,7 +17,7 @@ export default function ExperienceCanvas() {
             <Canvas
                 shadows
                 gl={{ antialias: true, alpha: true }}
-                camera={{ position: [0, 5, 20], fov: 50 }}
+                style={{ width: '100%', height: '100%' }}
             >
                 <Suspense fallback={null}>
                     <SatelliteOrbitalScene />

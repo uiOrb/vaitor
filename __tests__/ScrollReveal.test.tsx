@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
+import React from 'react'
 import ScrollReveal from '@/components/ScrollReveal'
 
 // Mock IntersectionObserver
@@ -10,23 +11,65 @@ mockIntersectionObserver.mockReturnValue({
 })
 window.IntersectionObserver = mockIntersectionObserver
 
-// Mock Framer Motion
-jest.mock('framer-motion', () => ({
-    motion: {
-        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-    },
-    useInView: () => true,
-}))
-
 describe('ScrollReveal', () => {
-    it('renders children when in view', () => {
+    beforeEach(() => {
+        jest.useFakeTimers()
+    })
+
+    afterEach(() => {
+        jest.useRealTimers()
+    })
+
+    it('renders children and animates on intersection', () => {
+        let intersectCallback: any
+        const mockObserver = jest.fn((callback) => {
+            intersectCallback = callback
+            return {
+                observe: jest.fn(),
+                disconnect: jest.fn(),
+                unobserve: jest.fn(),
+            }
+        })
+        window.IntersectionObserver = mockObserver as any
+
         render(
-            <ScrollReveal>
-                <div data-testid="child">Revealed</div>
+            <ScrollReveal delay={500}>
+                <div>Test Content</div>
             </ScrollReveal>
         )
 
-        expect(screen.getByTestId('child')).toBeInTheDocument()
-        expect(screen.getByText(/Revealed/i)).toBeInTheDocument()
+        const content = screen.getByText('Test Content')
+        const container = content.parentElement as HTMLElement
+
+        // Trigger non-intersecting first (coverage)
+        act(() => {
+            intersectCallback([{ isIntersecting: false, target: container }])
+        })
+        expect(container.style.opacity).toBe('0')
+
+        // Trigger intersection
+        act(() => {
+            intersectCallback([{ isIntersecting: true, target: container }])
+        })
+
+        // Fast forward time
+        act(() => {
+            jest.advanceTimersByTime(500)
+        })
+
+        // Final state
+        expect(container.style.opacity).toBe('1')
+        expect(container.style.transform).toBe('translateY(0)')
+    })
+
+    it('forwards ref correctly', () => {
+        const ref = React.createRef<HTMLDivElement>()
+        render(
+            <ScrollReveal ref={ref}>
+                <div>Ref Content</div>
+            </ScrollReveal>
+        )
+        expect(ref.current).toBeInstanceOf(HTMLDivElement)
+        expect(ref.current?.textContent).toBe('Ref Content')
     })
 })

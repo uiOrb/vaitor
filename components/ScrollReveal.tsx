@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect, ReactNode } from 'react'
+import { useRef, useEffect, ReactNode, forwardRef, useImperativeHandle } from 'react'
 
 interface ScrollRevealProps {
     children: ReactNode
@@ -9,18 +9,20 @@ interface ScrollRevealProps {
     style?: React.CSSProperties
 }
 
-export default function ScrollReveal({
+const ScrollReveal = forwardRef<HTMLDivElement, ScrollRevealProps>(({
     children,
     delay = 0,
     className = '',
     style = {},
-}: ScrollRevealProps) {
-    const ref = useRef<HTMLDivElement>(null)
+}, ref) => {
+    const internalRef = useRef<HTMLDivElement>(null)
+    
+    // Support external ref if provided
+    useImperativeHandle(ref, () => internalRef.current!)
 
     useEffect(() => {
-        const el = ref.current
-        if (!el) return
-
+        const el = internalRef.current
+        // el is always defined here if rendered
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -40,7 +42,7 @@ export default function ScrollReveal({
 
     return (
         <div
-            ref={ref}
+            ref={internalRef}
             className={className}
             style={{
                 opacity: 0,
@@ -52,4 +54,8 @@ export default function ScrollReveal({
             {children}
         </div>
     )
-}
+})
+
+ScrollReveal.displayName = 'ScrollReveal'
+
+export default ScrollReveal

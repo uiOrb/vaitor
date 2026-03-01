@@ -10,6 +10,18 @@ mockIntersectionObserver.mockReturnValue({
 })
 window.IntersectionObserver = mockIntersectionObserver
 
+// Mock dynamic components to avoid Three.js/Canvas issues in JSDOM
+jest.mock('next/dynamic', () => ({
+  __esModule: true,
+  default: (...args: any[]) => {
+    const Component = () => <div data-testid="mock-dynamic-component" />
+    return Component
+  },
+}))
+
+// Mock ExperienceCanvas specifically if needed, though dynamic mock might cover it
+jest.mock('@/components/ExperienceCanvas', () => () => <div data-testid="experience-canvas" />)
+
 // Use absolute path for mocking
 jest.mock('@/components/ScrollReveal', () => ({ children }: any) => <div data-testid="scroll-reveal">{children}</div>)
 
