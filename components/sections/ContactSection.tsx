@@ -8,6 +8,7 @@ function SignalWave() {
     const bars = 12
     return (
         <div
+            className="signal-wave-container"
             style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -208,6 +209,7 @@ export default function ContactSection() {
                                     initial={{ opacity: 0, scale: 0.9 }}
                                     animate={{ opacity: 1, scale: 1 }}
                                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                                    className="contact-form-success"
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -258,6 +260,7 @@ export default function ContactSection() {
                                 <motion.form
                                     key="form"
                                     onSubmit={handleSubmit}
+                                    className="contact-form"
                                     style={{
                                         display: 'flex',
                                         flexDirection: 'column',
@@ -431,6 +434,17 @@ export default function ContactSection() {
           .contact-grid {
             grid-template-columns: 1fr !important;
             gap: 48px !important;
+          }
+          .contact-form {
+            padding: 24px !important;
+          }
+          .contact-form-success {
+            padding: 32px 24px !important;
+          }
+          .signal-wave-container {
+            margin-bottom: 32px !important;
+            overflow-x: auto;
+            max-width: 100%;
           }
         }
       `}</style>

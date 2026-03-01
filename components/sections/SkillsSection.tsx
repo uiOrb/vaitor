@@ -66,6 +66,7 @@ export default function SkillsSection() {
                 {/* 3D Constellation Canvas */}
                 <ScrollReveal delay={100}>
                     <div
+                        className="skills-canvas-container"
                         style={{
                             width: '100%',
                             height: '500px',
@@ -101,6 +102,7 @@ export default function SkillsSection() {
                 {/* Legend */}
                 <ScrollReveal delay={200}>
                     <div
+                        className="skills-legend"
                         style={{
                             display: 'flex',
                             justifyContent: 'center',
@@ -147,6 +149,18 @@ export default function SkillsSection() {
                     </div>
                 </ScrollReveal>
             </div>
+
+            <style jsx>{`
+        @media (max-width: 768px) {
+          .skills-canvas-container {
+            height: 350px !important;
+          }
+          .skills-legend {
+            gap: 16px !important;
+            justify-content: flex-start !important;
+          }
+        }
+      `}</style>
         </section>
     )
 }

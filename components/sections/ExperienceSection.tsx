@@ -52,6 +52,7 @@ function TimelineItem({
         >
             {/* Card */}
             <div
+                className="experience-card"
                 style={{
                     background: '#18181B',
                     borderRadius: '16px',
@@ -255,6 +256,7 @@ export default function ExperienceSection() {
                             y2="1000"
                             stroke="rgba(99,102,241,0.3)"
                             strokeWidth="1"
+                            className="timeline-line"
                         />
                     </svg>
 
@@ -271,12 +273,20 @@ export default function ExperienceSection() {
         }
         @media (max-width: 768px) {
           .timeline-item-wrapper {
-            padding-left: 0 !important;
+            padding-left: 24px !important;
             padding-right: 0 !important;
             justify-content: flex-start !important;
           }
+          .experience-card {
+            padding: 24px !important;
+          }
           .timeline-dot {
-            display: none !important;
+            left: 0 !important;
+            transform: translateX(-50%) !important;
+          }
+          svg {
+            left: 0 !important;
+            transform: none !important;
           }
         }
       `}</style>

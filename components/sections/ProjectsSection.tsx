@@ -102,6 +102,7 @@ function ProjectCard({ project, index }: { project: typeof projects[0]; index: n
                 transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             >
                 <div
+                    className="project-card-inner"
                     style={{
                         background: '#18181B',
                         borderRadius: '16px',
@@ -312,6 +313,9 @@ export default function ProjectsSection() {
         @media (max-width: 768px) {
           .projects-grid {
             grid-template-columns: 1fr !important;
+          }
+          .project-card-inner {
+            padding: 24px !important;
           }
         }
       `}</style>
