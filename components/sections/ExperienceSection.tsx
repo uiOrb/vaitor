@@ -11,7 +11,7 @@ const experiences = [
         period: '2025 — Present',
         location: 'Bengaluru, India',
         description:
-            'I’m a DevSecOps engineer driven by the responsibility of keeping production systems secure, resilient, and fast at scale. I work deep within the codebase to understand how applications behave in real-world conditions, enabling me to design security and reliability into every stage of delivery. By building safe, optimized CI/CD pipelines and integrating SAST and DAST practices using tools like Azure Pipelines, SonarQube, and OWASP ZAP, I ensure vulnerabilities are caught early and releases remain stable. My focus is on shipping secure code without slowing teams down—balancing speed, security, and operational excellence to keep platforms running reliably in production.',
+            'I’m a DevSecOps engineer focused on building secure, resilient delivery systems that scale in production. With a deep understanding of application code and runtime behavior, I design CI/CD pipelines that embed security by default using Azure Pipelines, SonarQube, and OWASP ZAP. My work ensures vulnerabilities are detected early, releases stay fast, and production remains stable—balancing security, performance, and reliability without friction.',
         tags: ['Azure Pipelines', 'SonarQube', 'OWASP ZAP', 'Azure', 'GitOps'],
         current: true,
     },
@@ -23,18 +23,7 @@ const experiences = [
         location: 'Bengaluru, India',
         description:
             'Designed and maintained CI/CD pipelines for microservices deployments. Built containerized services with Docker, automated infrastructure provisioning with Terraform, and established monitoring and observability stacks for production workloads.',
-        tags: ['Docker', 'Github Actions', 'Azure Pipelines', 'Terraform', 'Python', 'Monitoring', 'Kubernetes', 'AKS', 'Azure', 'Linux', 'Powershell', 'bash'],
-        current: false,
-    },
-    {
-        id: 3,
-        role: 'Cloud & Systems Analyst',
-        company: 'IBM',
-        period: '2021 — 2021',
-        location: 'Bengaluru, India',
-        description:
-            'Delivered cloud migration assessments and hybrid infrastructure planning for enterprise clients. Collaborated with cross-functional teams to evaluate workloads, identify cloud-readiness, and produce architecture blueprints aligned to client goals.',
-        tags: ['Azure', 'Cloud Migration', 'Architecture', 'Enterprise', 'Managed Services'],
+        tags: ['Docker', 'Github', 'Github Actions', 'Azure Pipelines', 'Terraform', 'Python', 'Monitoring', 'Kubernetes', 'AKS', 'Azure', 'Linux', 'Powershell', 'bash', 'Azure', 'Cloud Migration', 'Architecture', 'Enterprise', 'Managed Services', 'Azure Local'],
         current: false,
     },
 ]
