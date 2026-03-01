@@ -77,15 +77,14 @@ export default function HeroSection() {
             >
                 {/* Top wordmark */}
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
-                    animate={{ opacity: 1, y: 0 }}
+                    initial={{ opacity: 0, y: -20, x: '-50%' }}
+                    animate={{ opacity: 1, y: 0, x: '-50%' }}
                     transition={{ duration: 0.8, delay: 3.0, ease: [0.22, 1, 0.36, 1] }}
                     className="hero-wordmark"
                     style={{
                         position: 'absolute',
                         top: '80px',
                         left: '50%',
-                        transform: 'translateX(-50%)',
                         fontFamily: 'Inter, sans-serif',
                         fontWeight: 700,
                         fontSize: '12px',
