@@ -26,6 +26,7 @@ const dmSerif = localFont({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://vaitor.dev'),
   title: 'VAITOR — Reeve Lobo | Software Developer',
   description: 'Cinematic portfolio of Reeve Lobo, Software Developer at IBM. A journey through code, craft, and cosmos.',
   keywords: ['Reeve Lobo', 'Software Developer', 'IBM', 'Portfolio', 'Full Stack', 'DevOps', 'Cloud'],
