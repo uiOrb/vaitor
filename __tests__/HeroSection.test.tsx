@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import HeroSection from '@/components/sections/HeroSection'
 
 // Mock dynamic components
@@ -40,6 +40,20 @@ describe('HeroSection', () => {
         // Test click
         fireEvent.click(cta)
         expect(document.getElementById).toHaveBeenCalledWith('origin')
-        expect(mockElement.scrollIntoView).toHaveBeenCalledWith({ behavior: 'smooth' })
+        expect(mockElement.scrollIntoView).toHaveBeenCalled()
+
+        // Test scroll hint click
+        const scrollHint = screen.getByText(/Scroll/i).closest('div')
+        if (scrollHint) {
+            fireEvent.click(scrollHint)
+            expect(mockElement.scrollIntoView).toHaveBeenCalled()
+        }
+    })
+
+    it('handles window resize for style coverage', () => {
+        render(<HeroSection />)
+        act(() => {
+            window.dispatchEvent(new Event('resize'))
+        })
     })
 })

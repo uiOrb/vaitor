@@ -14,7 +14,7 @@ jest.mock('@/components/Navbar', () => () => <div data-testid="navbar">Navbar</d
 // Note: HeroSection is handled by next/dynamic mock above if it matches the first dynamic call
 jest.mock('@/components/sections/AboutSection', () => () => <div data-testid="about">About</div>)
 jest.mock('@/components/sections/ExperienceSection', () => () => <div data-testid="experience">Experience</div>)
-jest.mock('@/components/sections/SkillsSection', () => () => <div data-testid="skills">Skills</div>)
+jest.mock('@/components/sections/CosmicKnowledgeSection', () => () => <div data-testid="cosmic-knowledge">Cosmic Knowledge</div>)
 jest.mock('@/components/sections/ProjectsSection', () => () => <div data-testid="projects">Projects</div>)
 jest.mock('@/components/sections/ContactSection', () => () => <div data-testid="contact">Contact</div>)
 jest.mock('@/components/sections/Footer', () => () => <div data-testid="footer">Footer</div>)
@@ -28,7 +28,7 @@ describe('Home Page', () => {
         expect(screen.getByTestId('hero')).toBeInTheDocument()
         expect(screen.getByTestId('about')).toBeInTheDocument()
         expect(screen.getByTestId('experience')).toBeInTheDocument()
-        expect(screen.getByTestId('skills')).toBeInTheDocument()
+        expect(screen.getByTestId('cosmic-knowledge')).toBeInTheDocument()
         expect(screen.getByTestId('projects')).toBeInTheDocument()
         expect(screen.getByTestId('contact')).toBeInTheDocument()
         expect(screen.getByTestId('footer')).toBeInTheDocument()

@@ -3,8 +3,7 @@ import LoadingScreen from '@/components/LoadingScreen'
 import Navbar from '@/components/Navbar'
 import AboutSection from '@/components/sections/AboutSection'
 import ExperienceSection from '@/components/sections/ExperienceSection'
-import SkillsSection from '@/components/sections/SkillsSection'
-import CertificationSection from '@/components/sections/CertificationSection'
+import CosmicKnowledgeSection from '@/components/sections/CosmicKnowledgeSection'
 import ProjectsSection from '@/components/sections/ProjectsSection'
 import ContactSection from '@/components/sections/ContactSection'
 import Footer from '@/components/sections/Footer'
@@ -22,8 +21,7 @@ export default function Home() {
         <HeroSection />
         <AboutSection />
         <ExperienceSection />
-        <SkillsSection />
-        <CertificationSection />
+        <CosmicKnowledgeSection />
         <ProjectsSection />
         <ContactSection />
       </main>
