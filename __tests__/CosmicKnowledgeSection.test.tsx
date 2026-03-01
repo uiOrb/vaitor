@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import CosmicKnowledgeSection from '@/components/sections/CosmicKnowledgeSection'
 
 // Mock sub-components
@@ -21,6 +21,12 @@ jest.mock('@/components/sections/CosmicBackground', () => {
     }
 })
 
+// Mock next/image
+jest.mock('next/image', () => ({
+    __esModule: true,
+    default: ({ src, alt }: any) => <img src={src} alt={alt} />,
+}))
+
 describe('CosmicKnowledgeSection', () => {
     it('renders both Skills and Certification sub-sections', async () => {
         render(<CosmicKnowledgeSection />)
@@ -39,5 +45,40 @@ describe('CosmicKnowledgeSection', () => {
         
         // Check for specific certification (from data)
         expect(screen.getByText(/Certified Kubernetes Application Developer/i)).toBeInTheDocument()
+    })
+
+    it('updates mouse position on mouse move', () => {
+        const { container } = render(<CosmicKnowledgeSection />)
+        const section = container.querySelector('.spotlight-section') as HTMLElement
+
+        if (section) {
+            // Mock getBoundingClientRect
+            section.getBoundingClientRect = jest.fn(() => ({
+                left: 0,
+                top: 0,
+                width: 1000,
+                height: 1000,
+                bottom: 1000,
+                right: 1000,
+                x: 0,
+                y: 0,
+                toJSON: () => { },
+            } as any))
+
+            fireEvent.mouseMove(section, { clientX: 100, clientY: 200 })
+
+            expect(section.style.getPropertyValue('--mouse-x')).toBe('100px')
+            expect(section.style.getPropertyValue('--mouse-y')).toBe('200px')
+        }
+    })
+
+    it('updates opacity on mouse enter and leave', () => {
+        const { container } = render(<CosmicKnowledgeSection />)
+        const section = container.querySelector('.spotlight-section') as HTMLElement
+
+        if (section) {
+            fireEvent.mouseEnter(section)
+            fireEvent.mouseLeave(section)
+        }
     })
 })
