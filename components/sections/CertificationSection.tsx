@@ -51,7 +51,7 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                 style={{
                     perspective: '1000px',
                     width: '100%',
-                    height: '340px',
+                    height: '360px',
                     cursor: 'pointer',
                 }}
             >
@@ -100,46 +100,52 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                         <div
                             style={{
                                 position: 'relative',
-                                width: '120px',
-                                height: '120px',
+                                width: '140px',
+                                height: '140px',
                                 marginBottom: '24px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}
                         >
                             <Image
                                 src={cert.badge}
                                 alt={cert.title}
-                                fill
+                                width={140}
+                                height={140}
                                 style={{ objectFit: 'contain' }}
                             />
                         </div>
 
-                        <h3
-                            style={{
-                                fontSize: '18px',
-                                fontWeight: 600,
-                                color: '#F5F5F7',
-                                marginBottom: '8px',
-                                lineHeight: '1.4',
-                            }}
-                        >
-                            {cert.title}
-                        </h3>
-                        <p
-                            style={{
-                                fontSize: '13px',
-                                color: '#A1A1AA',
-                                letterSpacing: '0.05em',
-                                textTransform: 'uppercase',
-                                fontWeight: 500,
-                            }}
-                        >
-                            {cert.org}
-                        </p>
+                        <div style={{ height: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <h3
+                                style={{
+                                    fontSize: '17px',
+                                    fontWeight: 600,
+                                    color: '#F5F5F7',
+                                    marginBottom: '6px',
+                                    lineHeight: '1.3',
+                                }}
+                            >
+                                {cert.title}
+                            </h3>
+                            <p
+                                style={{
+                                    fontSize: '12px',
+                                    color: '#A1A1AA',
+                                    letterSpacing: '0.05em',
+                                    textTransform: 'uppercase',
+                                    fontWeight: 500,
+                                }}
+                            >
+                                {cert.org}
+                            </p>
+                        </div>
 
                         <div
                             style={{
-                                marginTop: '20px',
-                                fontSize: '11px',
+                                marginTop: '16px',
+                                fontSize: '10px',
                                 color: cert.color,
                                 border: `1px solid ${cert.color}44`,
                                 padding: '4px 12px',
@@ -166,46 +172,49 @@ function CertificationCard({ cert, index }: { cert: typeof certifications[0]; in
                             padding: '32px',
                             display: 'flex',
                             flexDirection: 'column',
-                            justifyContent: 'center',
-                            textAlign: 'left',
                             overflow: 'hidden',
                         }}
                     >
-                        <h4
-                            style={{
-                                fontSize: '14px',
-                                fontWeight: 600,
-                                color: cert.color,
-                                marginBottom: '16px',
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.1em',
-                            }}
-                        >
-                            Achievement Log
-                        </h4>
-                        <p
-                            style={{
-                                fontSize: '15px',
-                                lineHeight: '1.7',
-                                color: '#D4D4D8',
-                                fontStyle: 'italic',
-                                fontFamily: 'DM Serif Display, serif',
-                            }}
-                        >
-                            &ldquo;{cert.experience}&rdquo;
-                        </p>
+                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <h4
+                                style={{
+                                    fontSize: '13px',
+                                    fontWeight: 600,
+                                    color: cert.color,
+                                    marginBottom: '16px',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.1em',
+                                    textAlign: 'left',
+                                }}
+                            >
+                                Achievement Log
+                            </h4>
+                            <p
+                                style={{
+                                    fontSize: '15px',
+                                    lineHeight: '1.6',
+                                    color: '#D4D4D8',
+                                    fontStyle: 'italic',
+                                    fontFamily: 'DM Serif Display, serif',
+                                    textAlign: 'left',
+                                }}
+                            >
+                                &ldquo;{cert.experience}&rdquo;
+                            </p>
+                        </div>
                         
                         <div
                             style={{
-                                marginTop: '24px',
+                                marginTop: 'auto',
+                                paddingTop: '20px',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
                                 opacity: 0.6,
                             }}
                         >
-                            <div style={{ width: '32px', height: '1px', background: cert.color }} />
-                            <span style={{ fontSize: '10px', color: '#A1A1AA', fontWeight: 600, textTransform: 'uppercase' }}>
+                            <div style={{ width: '24px', height: '1px', background: cert.color, flexShrink: 0 }} />
+                            <span style={{ fontSize: '9px', color: '#A1A1AA', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Verification Signal Active
                             </span>
                         </div>
@@ -278,7 +287,7 @@ export default function CertificationSection() {
                         grid-template-columns: 1fr !important;
                     }
                     .cert-card-container {
-                        height: 300px !important;
+                        height: 340px !important;
                     }
                 }
             `}</style>
