@@ -2,13 +2,64 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { PerspectiveCamera, Trail } from '@react-three/drei'
+import { PerspectiveCamera, Trail, Sphere, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
 // Constants for orbital mechanics
-const MU = 200
+const MU = 250 // Slightly increased for the mass of Mars
 const STATION_KEEPING_THRESHOLD = 0.5
 const THRUSTER_STRENGTH = 0.15
+
+/**
+ * Procedural Mars Model
+ */
+function Mars({ radius }: { radius: number }) {
+    const marsRef = useRef<THREE.Mesh>(null)
+    
+    useFrame((state, delta) => {
+        if (marsRef.current) {
+            marsRef.current.rotation.y += delta * 0.1 // Realistic slow rotation
+        }
+    })
+
+    return (
+        <group>
+            {/* Mars Surface */}
+            <mesh ref={marsRef}>
+                <sphereGeometry args={[radius, 64, 64]} />
+                <meshStandardMaterial 
+                    color="#C1440E" // Martian Rust Red
+                    roughness={0.8}
+                    metalness={0.1}
+                    emissive="#441100"
+                    emissiveIntensity={0.2}
+                />
+            </mesh>
+            
+            {/* Atmosphere / Glow */}
+            <mesh scale={[1.02, 1.02, 1.02]}>
+                <sphereGeometry args={[radius, 32, 32]} />
+                <meshStandardMaterial 
+                    color="#E27B58"
+                    transparent 
+                    opacity={0.15}
+                    side={THREE.BackSide}
+                />
+            </mesh>
+
+            {/* Subtle Surface Detail (Procedural shadows/craters) */}
+            <mesh rotation={[0.5, 0.5, 0.5]}>
+                <sphereGeometry args={[radius + 0.01, 32, 32]} />
+                <meshStandardMaterial 
+                    color="#8B3103"
+                    transparent
+                    opacity={0.3}
+                    wireframe
+                />
+            </mesh>
+        </group>
+    )
+}
 
 /**
  * Satellite Geometry (Professional high-fidelity procedural model)
@@ -26,14 +77,12 @@ const SatelliteModel = React.memo(({
 }) => {
     const group = useRef<THREE.Group>(null)
     const rotationSpeed = useRef(0)
-    // Random rotation factors for each instance
     const randomRotationAxis = useMemo(() => new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize(), [])
     const randomRotationSpeed = useMemo(() => 0.1 + Math.random() * 0.3, [])
 
     useFrame((state, delta) => {
         if (!group.current) return
         
-        // 1. Attitude Control or Random Rotation
         if (isHovered) {
             rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 15, delta * 5)
             group.current.rotation.y += rotationSpeed.current * delta
@@ -43,21 +92,19 @@ const SatelliteModel = React.memo(({
             if (rotationSpeed.current > 0.01) {
                 group.current.rotation.y += rotationSpeed.current * delta
             }
-            
-            // Apply randomized slow rotation when not hovered
             group.current.rotateOnAxis(randomRotationAxis, randomRotationSpeed * delta)
         }
     })
 
     return (
         <group ref={group} scale={[scale, scale, scale]}>
-            {/* Central Bus: Beveled Rectangular Prism (Graphite Gray Alloy) */}
+            {/* Central Bus */}
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[1.6, 2.2, 1.6]} />
                 <meshStandardMaterial color="#2D2D30" metalness={0.7} roughness={0.4} />
             </mesh>
             
-            {/* Layered MLI Insulation (Gold Foil) */}
+            {/* Gold Foil */}
             <group position={[0, -0.4, 0]}>
                 <mesh scale={[1.02, 0.6, 1.02]}>
                     <boxGeometry args={[1.6, 1, 1.6]} />
@@ -132,8 +179,8 @@ function OrbitalSatellite({
     isMobile: boolean
 }) {
     const groupRef = useRef<THREE.Group>(null)
-    const pos = useRef(new THREE.Vector3())
-    const vel = useRef(new THREE.Vector3())
+    const pos = useRef(new THREE.Vector3(center.x + radius, 0, 0))
+    const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / radius)))
     const targetPos = useRef(new THREE.Vector3())
     const [thrusterActive, setThrusterActive] = useState(false)
     const [isHovered, setIsHovered] = useState(false)
@@ -141,16 +188,13 @@ function OrbitalSatellite({
     useFrame((_state, delta) => {
         const dt = Math.min(delta, 0.1)
 
-        // 1. Target Tracking along fixed orbit
-        const arcRange = isMobile ? Math.PI * 0.4 : Math.PI * 0.6
-        // Each satellite has a different target angle based on shared scroll + fixed offset
+        const arcRange = isMobile ? Math.PI * 0.5 : Math.PI * 0.8
         const targetAngle = (scrollOffset.current * arcRange) - (arcRange / 2) + offset
         
         const tx = center.x + Math.cos(targetAngle) * radius
         const tz = center.z + Math.sin(targetAngle) * radius
         targetPos.current.set(tx, 0, tz)
 
-        // 2. Physics (Keep them on the radius)
         const rVec = new THREE.Vector3().copy(pos.current).sub(center)
         const rMag = Math.max(rVec.length(), 1)
         const gravity = rVec.normalize().multiplyScalar(-MU / (rMag * rMag))
@@ -180,7 +224,7 @@ function OrbitalSatellite({
             onPointerOver={() => setIsHovered(true)}
             onPointerOut={() => setIsHovered(false)}
         >
-            <Trail width={scale * 3} length={15} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
+            <Trail width={scale * 5} length={10} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
                 <SatelliteModel 
                     thrusterActive={thrusterActive} 
                     alignment={vel.current} 
@@ -199,18 +243,19 @@ export default function SatelliteOrbitalScene() {
     const { size } = useThree()
     const scrollOffset = useRef(0)
     
-    // Responsive settings
     const isMobile = size.width < 768
-    const radius = isMobile ? 12 : 18
-    const horizontalShift = isMobile ? -5 : -12
-    const center = useMemo(() => new THREE.Vector3(horizontalShift, 0, 0), [horizontalShift])
+    // Increased orbital radius to make room for Mars
+    const radius = isMobile ? 14 : 22
+    const center = useMemo(() => new THREE.Vector3(0, 0, 0), [])
+    
+    // Scale reduced significantly (~7x smaller from previous 1.2 -> 0.17)
+    const satScale = isMobile ? 0.1 : 0.18
 
-    // Fleet Configuration: 3 Satellites
     const fleet = useMemo(() => [
-        { id: 1, offset: 0, scale: isMobile ? 0.7 : 1.2 },      // Center
-        { id: 2, offset: -0.4, scale: isMobile ? 0.5 : 0.8 },   // Leading
-        { id: 3, offset: 0.4, scale: isMobile ? 0.5 : 0.8 },    // Trailing
-    ], [isMobile])
+        { id: 1, offset: 0, scale: satScale },
+        { id: 2, offset: -0.5, scale: satScale * 0.8 },
+        { id: 3, offset: 0.5, scale: satScale * 0.8 },
+    ], [satScale])
     
     useEffect(() => {
         const handleScroll = () => {
@@ -230,16 +275,19 @@ export default function SatelliteOrbitalScene() {
     }, [])
 
     useFrame((state) => {
-        // Shared camera focus
-        state.camera.lookAt(isMobile ? -2 : -5, 0, 0)
+        state.camera.lookAt(0, 0, 0)
     })
 
     return (
         <>
-            <ambientLight intensity={1.5} />
-            <pointLight position={[50, 50, 50]} intensity={4} color="#FFFFFF" />
+            <ambientLight intensity={1.2} />
+            <pointLight position={[50, 50, 50]} intensity={3} color="#FFFFFF" />
             <pointLight position={[-50, -20, -20]} intensity={2} color="#818CF8" />
             
+            {/* Centerpiece: Mars */}
+            <Mars radius={isMobile ? 5 : 8} />
+
+            {/* Satellite Fleet */}
             {fleet.map((sat) => (
                 <OrbitalSatellite 
                     key={sat.id}
@@ -254,8 +302,8 @@ export default function SatelliteOrbitalScene() {
 
             <PerspectiveCamera 
                 makeDefault 
-                position={isMobile ? [0, 5, 25] : [10, 8, 32]} 
-                fov={isMobile ? 50 : 40} 
+                position={isMobile ? [0, 10, 35] : [0, 15, 45]} 
+                fov={40} 
             />
         </>
     )
