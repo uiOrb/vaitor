@@ -1,7 +1,10 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import ScrollReveal from '../ScrollReveal'
+
+const ExperienceCanvas = dynamic(() => import('../ExperienceCanvas'), { ssr: false })
 
 const experiences = [
     {
@@ -54,7 +57,8 @@ function TimelineItem({
             <div
                 className="experience-card"
                 style={{
-                    background: '#18181B',
+                    background: 'rgba(24, 24, 27, 0.8)',
+                    backdropFilter: 'blur(8px)',
                     borderRadius: '16px',
                     border: exp.current
                         ? '1px solid rgba(99,102,241,0.3)'
@@ -210,20 +214,9 @@ export default function ExperienceSection() {
             className="section"
             style={{ background: '#09090B', position: 'relative', overflow: 'hidden' }}
         >
-            {/* Background glow */}
-            <div
-                style={{
-                    position: 'absolute',
-                    top: '50%',
-                    left: '-10%',
-                    width: '500px',
-                    height: '500px',
-                    background: 'radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)',
-                    pointerEvents: 'none',
-                }}
-            />
+            <ExperienceCanvas />
 
-            <div className="section-inner">
+            <div className="section-inner" style={{ position: 'relative', zIndex: 1 }}>
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>
