@@ -57,7 +57,7 @@ function SatelliteModel({
 
     return (
         <group ref={group} scale={[scale, scale, scale]}>
-            {/* Main Bus - Octagonal core for high-tech look */}
+            {/* Main Bus - Octagonal core */}
             <mesh castShadow receiveShadow>
                 <cylinderGeometry args={[0.8, 0.9, 2, 8]} />
                 <meshStandardMaterial color="#27272A" metalness={0.9} roughness={0.2} />
@@ -69,15 +69,15 @@ function SatelliteModel({
                 <meshStandardMaterial color="#3F3F46" metalness={0.8} roughness={0.3} />
             </mesh>
             
-            {/* Multi-Layer Insulation (MLI) Gold Foil Wrap (Segmented) */}
+            {/* Gold Foil Wrap - Stronger Emissive for Visibility */}
             <mesh position={[0, -0.2, 0]} scale={[1.02, 1.02, 1.02]}>
                 <cylinderGeometry args={[0.82, 0.82, 1.2, 8]} />
                 <meshStandardMaterial 
                     color="#D4AF37" 
                     metalness={1} 
-                    roughness={0.15} 
+                    roughness={0.1} 
                     emissive="#FFD700" 
-                    emissiveIntensity={0.3} 
+                    emissiveIntensity={0.6} 
                 />
             </mesh>
 
@@ -85,7 +85,7 @@ function SatelliteModel({
             <group position={[0, 1.4, 0]}>
                 <mesh rotation={[-Math.PI / 6, 0, 0]}>
                     <sphereGeometry args={[0.7, 32, 32, 0, Math.PI * 2, 0, Math.PI / 4]} />
-                    <meshStandardMaterial color="#D1D5DB" metalness={0.9} roughness={0.1} side={THREE.DoubleSide} />
+                    <meshStandardMaterial color="#F5F5F7" metalness={0.9} roughness={0.1} side={THREE.DoubleSide} />
                 </mesh>
                 <mesh position={[0, 0.4, 0.2]} rotation={[-Math.PI / 6, 0, 0]}>
                     <cylinderGeometry args={[0.02, 0.05, 0.4]} />
@@ -93,7 +93,7 @@ function SatelliteModel({
                 </mesh>
             </group>
 
-            {/* Advanced Solar Arrays */}
+            {/* Advanced Solar Arrays - Bright Blue Emissive */}
             {[-1, 1].map((side) => (
                 <group key={side} position={[side * 0.9, 0, 0]}>
                     <mesh rotation={[0, 0, Math.PI / 2]} position={[side * 0.5, 0, 0]}>
@@ -110,8 +110,8 @@ function SatelliteModel({
                             <planeGeometry args={[3.8, 1.2]} />
                             <meshStandardMaterial 
                                 color="#2563EB" 
-                                emissive="#0033FF" 
-                                emissiveIntensity={0.8} 
+                                emissive="#3B82F6" 
+                                emissiveIntensity={1.2} 
                                 metalness={0.9} 
                                 roughness={0.1} 
                             />
@@ -120,7 +120,7 @@ function SatelliteModel({
                 </group>
             ))}
 
-            {/* Thruster Clusters */}
+            {/* RCS Thrusters */}
             {[[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([x, z], idx) => (
                 <group key={idx} position={[x * 0.6, -0.8, z * 0.6]}>
                     <mesh>
@@ -143,13 +143,14 @@ function SatelliteModel({
  * Main Orbital Satellite Engine
  */
 export default function SatelliteOrbitalScene() {
-    const { size, viewport } = useThree()
+    const { size } = useThree()
     const groupRef = useRef<THREE.Group>(null)
+    const lightRef = useRef<THREE.PointLight>(null)
     
     // Responsive settings
     const isMobile = size.width < 768
     const radius = isMobile ? 12 : 18
-    const satScale = isMobile ? 0.6 : 1.1
+    const satScale = isMobile ? 0.7 : 1.2 // Increased scale
     const horizontalShift = isMobile ? -5 : -12
     
     const center = useMemo(() => new THREE.Vector3(horizontalShift, 0, 0), [horizontalShift])
@@ -183,14 +184,14 @@ export default function SatelliteOrbitalScene() {
     useFrame((state, delta) => {
         const dt = Math.min(delta, 0.1)
 
-        // Target Tracking
+        // 1. Target Tracking
         const arcRange = isMobile ? Math.PI * 0.4 : Math.PI * 0.6
         const targetAngle = (scrollOffset.current * arcRange) - arcRange / 2
         const tx = center.x + Math.cos(targetAngle) * radius
         const tz = center.z + Math.sin(targetAngle) * radius
         targetPos.current.set(tx, 0, tz)
 
-        // Physics
+        // 2. Physics
         const rVec = new THREE.Vector3().copy(pos.current).sub(center)
         const rMag = rVec.length()
         const gravity = rVec.normalize().multiplyScalar(-MU / (rMag * rMag))
@@ -207,8 +208,18 @@ export default function SatelliteOrbitalScene() {
         vel.current.add(gravity.multiplyScalar(dt))
         pos.current.add(new THREE.Vector3().copy(vel.current).multiplyScalar(dt))
 
+        // 3. Update Visuals
         if (groupRef.current) {
             groupRef.current.position.copy(pos.current)
+        }
+
+        // 4. Satellite "Spotlight" Logic
+        // As it scrolls near components, boost the light intensity
+        if (lightRef.current) {
+            lightRef.current.position.copy(pos.current).add(new THREE.Vector3(2, 5, 5))
+            // Peak intensity when scroll is around 0.5 (center of experience section)
+            const intensityMultiplier = 1 + Math.sin(scrollOffset.current * Math.PI) * 2
+            lightRef.current.intensity = 15 * intensityMultiplier
         }
 
         // Responsive camera look-at
@@ -219,9 +230,17 @@ export default function SatelliteOrbitalScene() {
 
     return (
         <>
-            <ambientLight intensity={1.2} />
-            <pointLight position={[30, 30, 30]} intensity={3} color="#FFFFFF" />
-            <pointLight position={[-30, -15, -15]} intensity={2} color="#818CF8" />
+            <ambientLight intensity={1.5} /> {/* High base ambient light */}
+            <pointLight position={[50, 50, 50]} intensity={4} color="#FFFFFF" />
+            <pointLight position={[-50, -20, -20]} intensity={2} color="#818CF8" />
+            
+            {/* Dynamic Follow Light (The "Spotlight" that shines on it near components) */}
+            <pointLight 
+                ref={lightRef} 
+                distance={40} 
+                decay={2} 
+                color="#FFFFFF" 
+            />
 
             <group 
                 ref={groupRef}
@@ -229,8 +248,8 @@ export default function SatelliteOrbitalScene() {
                 onPointerOut={() => setIsHovered(false)}
             >
                 <Trail
-                    width={isMobile ? 1.5 : 3}
-                    length={15}
+                    width={isMobile ? 2 : 4}
+                    length={20}
                     color={new THREE.Color('#818CF8')}
                     attenuation={(t) => t * t}
                 >
