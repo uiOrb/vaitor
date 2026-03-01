@@ -189,6 +189,21 @@ export default function CosmicKnowledgeSection() {
         >
             <CosmicBackground />
 
+            {/* Aurora effect at top */}
+            <div
+                style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '2px',
+                    background: 'linear-gradient(90deg, transparent, #6366F1, #818CF8, #A78BFA, transparent)',
+                    backgroundSize: '200% 100%',
+                    animation: 'auroraSlide 6s linear infinite',
+                    zIndex: 2,
+                }}
+            />
+
             {/* Ambient Nebula */}
             <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.03) 0%, transparent 70%)', pointerEvents: 'none' }} />
 
@@ -269,6 +284,10 @@ export default function CosmicKnowledgeSection() {
             </div>
 
             <style jsx global>{`
+                @keyframes auroraSlide {
+                    0% { background-position: 0% 0; }
+                    100% { background-position: 200% 0; }
+                }
                 @media (max-width: 1200px) {
                     .cert-grid { grid-template-columns: repeat(2, 1fr) !important; }
                 }
