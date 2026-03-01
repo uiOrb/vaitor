@@ -86,31 +86,31 @@ function SkillNodeMesh({ node }: { node: SkillNode }) {
             {hovered && (
                 <>
                     <pointLight color={color} intensity={2} distance={2} />
-                    <Html distanceFactor={40} center>
+                    <Html distanceFactor={20} center>
                         <div
                             style={{
                                 background: 'rgba(9,9,11,0.98)',
-                                border: `2px solid ${color}66`,
-                                borderRadius: '16px',
-                                padding: '24px 48px',
+                                border: `1px solid ${color}66`,
+                                borderRadius: '12px',
+                                padding: '16px 32px',
                                 color: '#F5F5F7',
                                 fontFamily: 'Inter, sans-serif',
-                                fontSize: '32px',
+                                fontSize: '24px',
                                 fontWeight: 700,
                                 whiteSpace: 'nowrap',
                                 pointerEvents: 'none',
-                                boxShadow: `0 0 40px ${color}44`,
+                                boxShadow: `0 0 32px ${color}44`,
                                 backdropFilter: 'blur(8px)',
                                 display: 'flex',
                                 flexDirection: 'column',
                                 alignItems: 'center',
-                                gap: '8px',
+                                gap: '6px',
                             }}
                         >
                             {node.label}
                             <div
                                 style={{
-                                    fontSize: '16px',
+                                    fontSize: '12px',
                                     color: color,
                                     letterSpacing: '0.12em',
                                     textTransform: 'uppercase',
