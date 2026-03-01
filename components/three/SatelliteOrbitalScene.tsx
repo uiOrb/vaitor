@@ -2,53 +2,73 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
-import { Float, PerspectiveCamera, Trail } from '@react-three/drei'
+import { PerspectiveCamera, Trail } from '@react-three/drei'
 import * as THREE from 'three'
 
 // Constants for orbital mechanics
-const MU = 200 // Increased gravity for faster motion
-const RADIUS = 22 // Larger radius
-const DRIFT_STRENGTH = 0.001
+const MU = 200
+const RADIUS = 20 // Slightly reduced to keep within bounds
 const STATION_KEEPING_THRESHOLD = 0.5
-const THRUSTER_STRENGTH = 0.15 // Faster thrusters
+const THRUSTER_STRENGTH = 0.15
 
 /**
  * Satellite Geometry (Procedural high-quality model)
  */
-function SatelliteModel({ thrusterActive, alignment }: { thrusterActive: boolean, alignment: THREE.Vector3 }) {
+function SatelliteModel({ 
+    thrusterActive, 
+    alignment, 
+    isHovered 
+}: { 
+    thrusterActive: boolean, 
+    alignment: THREE.Vector3,
+    isHovered: boolean
+}) {
     const group = useRef<THREE.Group>(null)
+    const rotationSpeed = useRef(0)
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         if (!group.current) return
         
         // 1. Attitude Control: Align model to velocity vector
-        if (alignment.length() > 0.01) {
+        if (alignment.length() > 0.01 && !isHovered) {
             const lookAtMatrix = new THREE.Matrix4()
-            // eye, target, up
             lookAtMatrix.lookAt(new THREE.Vector3(0, 0, 0), alignment, new THREE.Vector3(0, 1, 0))
             const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(lookAtMatrix)
             group.current.quaternion.slerp(targetQuaternion, 0.1)
         }
 
-        const t = state.clock.elapsedTime
-        group.current.rotation.z += Math.sin(t * 0.5) * 0.002
+        // 2. Hover Effect: Rapid rotation
+        if (isHovered) {
+            rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 15, delta * 5)
+            group.current.rotation.y += rotationSpeed.current * delta
+            group.current.rotation.z += rotationSpeed.current * 0.5 * delta
+        } else {
+            rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 0, delta * 2)
+            if (rotationSpeed.current > 0.01) {
+                group.current.rotation.y += rotationSpeed.current * delta
+            }
+            
+            // Subtle idle animation
+            const t = state.clock.elapsedTime
+            group.current.rotation.z += Math.sin(t * 0.5) * 0.002
+        }
     })
 
     return (
         <group ref={group}>
-            {/* Main Body - Bus (Slightly larger) */}
+            {/* Main Body - Bus */}
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[1.5, 1.8, 1.5]} />
                 <meshStandardMaterial color="#404040" metalness={0.9} roughness={0.1} />
             </mesh>
             
-            {/* Gold Foil Wrapper - Very bright gold */}
+            {/* Gold Foil Wrapper */}
             <mesh position={[0, 0, 0]} scale={[1.05, 1.05, 1.05]}>
                 <boxGeometry args={[1.5, 1.2, 1.5]} />
                 <meshStandardMaterial color="#FFD700" metalness={1} roughness={0.1} emissive="#665500" emissiveIntensity={0.5} />
             </mesh>
 
-            {/* Solar Panel Wings (Larger) */}
+            {/* Solar Panel Wings */}
             <group position={[-0.8, 0, 0]}>
                 <mesh position={[-2, 0, 0]}>
                     <boxGeometry args={[4, 1.2, 0.1]} />
@@ -95,12 +115,13 @@ function SatelliteModel({ thrusterActive, alignment }: { thrusterActive: boolean
  */
 export default function SatelliteOrbitalScene() {
     const groupRef = useRef<THREE.Group>(null)
-    const center = useMemo(() => new THREE.Vector3(-18, 0, 0), [])
+    const center = useMemo(() => new THREE.Vector3(-15, 0, 0), [])
     const pos = useRef(new THREE.Vector3(center.x + RADIUS, 0, 0))
     const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / RADIUS)))
     const targetPos = useRef(new THREE.Vector3().copy(pos.current))
     
     const [thrusterActive, setThrusterActive] = useState(false)
+    const [isHovered, setIsHovered] = useState(false)
     const scrollOffset = useRef(0)
     
     useEffect(() => {
@@ -109,6 +130,7 @@ export default function SatelliteOrbitalScene() {
             if (!section) return
             
             const rect = section.getBoundingClientRect()
+            // 0 to 1 mapping based on section visibility
             const progress = Math.max(0, Math.min(1, (window.innerHeight - rect.top) / (window.innerHeight + rect.height)))
             scrollOffset.current = progress
         }
@@ -125,8 +147,8 @@ export default function SatelliteOrbitalScene() {
     useFrame((state, delta) => {
         const dt = Math.min(delta, 0.1)
 
-        // 1. Target Tracking
-        const arcRange = Math.PI * 0.7
+        // 1. Target Tracking (Mapped to a safe arc that stays on screen)
+        const arcRange = Math.PI * 0.55 // Restricted arc
         const targetAngle = (scrollOffset.current * arcRange) - arcRange / 2
         const tx = center.x + Math.cos(targetAngle) * RADIUS
         const tz = center.z + Math.sin(targetAngle) * RADIUS
@@ -154,8 +176,8 @@ export default function SatelliteOrbitalScene() {
             groupRef.current.position.copy(pos.current)
         }
 
-        // Fixed camera framing looking at the center of the active area
-        state.camera.lookAt(-8, 0, 0)
+        // Keep camera focused on the active area
+        state.camera.lookAt(-5, 0, 0)
 
         if (thrusterActive !== thrusting) setThrusterActive(thrusting)
     })
@@ -166,18 +188,27 @@ export default function SatelliteOrbitalScene() {
             <pointLight position={[30, 30, 30]} intensity={2.5} color="#FFFFFF" />
             <pointLight position={[-30, -15, -15]} intensity={1.5} color="#818CF8" />
 
-            <group ref={groupRef}>
+            <group 
+                ref={groupRef}
+                onPointerOver={() => setIsHovered(true)}
+                onPointerOut={() => setIsHovered(false)}
+            >
                 <Trail
-                    width={3}
-                    length={20}
+                    width={2.5}
+                    length={15}
                     color={new THREE.Color('#818CF8')}
                     attenuation={(t) => t * t}
                 >
-                    <SatelliteModel thrusterActive={thrusterActive} alignment={vel.current} />
+                    <SatelliteModel 
+                        thrusterActive={thrusterActive} 
+                        alignment={vel.current} 
+                        isHovered={isHovered}
+                    />
                 </Trail>
             </group>
 
-            <PerspectiveCamera makeDefault position={[12, 10, 35]} fov={40} />
+            {/* Adjusted position to ensure satellite is always visible within boundaries */}
+            <PerspectiveCamera makeDefault position={[10, 8, 32]} fov={40} />
         </>
     )
 }
