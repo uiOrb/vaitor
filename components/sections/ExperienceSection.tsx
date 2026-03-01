@@ -19,11 +19,11 @@ const experiences = [
         id: 2,
         role: 'Associate Software Engineer - Development',
         company: 'Kyndryl',
-        period: '2022 — 2025',
+        period: '2021 — 2025',
         location: 'Bengaluru, India',
         description:
             'Designed and maintained CI/CD pipelines for microservices deployments. Built containerized services with Docker, automated infrastructure provisioning with Terraform, and established monitoring and observability stacks for production workloads.',
-        tags: ['Docker', 'Github', 'Github Actions', 'Azure Pipelines', 'Terraform', 'Python', 'Monitoring', 'Kubernetes', 'AKS', 'Azure', 'Linux', 'Powershell', 'bash', 'Azure', 'Cloud Migration', 'Architecture', 'Enterprise', 'Managed Services', 'Azure Local'],
+        tags: ['Azure', 'AWS', 'GCP', 'Kubernetes', 'Docker', 'Github', 'Github Actions', 'Azure Pipelines', 'Terraform', 'Azure Local'],
         current: false,
     },
 ]
