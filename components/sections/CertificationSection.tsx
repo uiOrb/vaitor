@@ -254,7 +254,7 @@ export default function CertificationSection() {
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>
-                        <p className="section-label">CHAPTER 03 · CREDENTIAL ARCHIVES</p>
+                        <p className="section-label">CHAPTER 04 · CREDENTIAL ARCHIVES</p>
                     </ScrollReveal>
                     <ScrollReveal delay={100}>
                         <h2>Validated skills. Tested in the field.</h2>

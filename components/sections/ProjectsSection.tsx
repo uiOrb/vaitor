@@ -278,7 +278,7 @@ export default function ProjectsSection() {
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>
-                        <p className="section-label">CHAPTER 04 · TRANSMISSIONS</p>
+                        <p className="section-label">CHAPTER 05 · TRANSMISSIONS</p>
                     </ScrollReveal>
                     <ScrollReveal delay={100}>
                         <h2>Work beamed out into the world.</h2>

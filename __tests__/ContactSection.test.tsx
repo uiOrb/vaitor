@@ -26,7 +26,7 @@ describe('ContactSection', () => {
     it('renders the contact form and labels', () => {
         render(<ContactSection />)
 
-        expect(screen.getByText(/CHAPTER 05 · OPEN CHANNEL/i)).toBeInTheDocument()
+        expect(screen.getByText(/CHAPTER 06 · OPEN CHANNEL/i)).toBeInTheDocument()
         expect(screen.getByLabelText(/Name/i)).toBeInTheDocument()
         expect(screen.getByLabelText(/Email/i)).toBeInTheDocument()
         expect(screen.getByLabelText(/Message/i)).toBeInTheDocument()
