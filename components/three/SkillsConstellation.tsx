@@ -86,7 +86,7 @@ function SkillNodeMesh({ node }: { node: SkillNode }) {
             {hovered && (
                 <>
                     <pointLight color={color} intensity={2} distance={2} />
-                    <Html distanceFactor={4} center>
+                    <Html distanceFactor={40} center>
                         <div
                             style={{
                                 background: 'rgba(9,9,11,0.98)',
