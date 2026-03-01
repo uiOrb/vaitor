@@ -133,7 +133,7 @@ export default function ContactSection() {
                     {/* Left panel */}
                     <div>
                         <ScrollReveal>
-                            <p className="section-label">CHAPTER 05 · OPEN CHANNEL</p>
+                            <p className="section-label">CHAPTER 06 · OPEN CHANNEL</p>
                         </ScrollReveal>
 
                         <ScrollReveal delay={100}>

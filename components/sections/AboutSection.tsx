@@ -71,8 +71,8 @@ export default function AboutSection() {
                                     marginBottom: '24px',
                                 }}
                             >
-                                I&apos;m Reeve Lobo — a Infrastructure Specialist at IBM, based in Bengaluru, India.
-                                My work sits at the intersection of infrastructure, cloud architecture, and intelligent
+                                I&apos;m Reeve Lobo — an Infrastructure Specialist at IBM, based in Bengaluru, India.
+                                My work sits at the intersection of application, infrastructure, cloud architecture, and AI
                                 systems, where I turn complex problems into elegant solutions that scale.
                             </p>
                         </ScrollReveal>
@@ -86,7 +86,7 @@ export default function AboutSection() {
                                     marginBottom: '32px',
                                 }}
                             >
-                                With a deep passion for Kubernetes, DevOps pipelines, and AI-driven platforms,
+                                With a deep passion for Kubernetes, CI/CD, Security and AI-driven platforms,
                                 I believe in building technology that doesn&apos;t just function — it resonates.
                                 Every system I design carries a story, a purpose, and a drive to go further.
                             </p>

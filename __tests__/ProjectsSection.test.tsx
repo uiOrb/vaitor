@@ -20,7 +20,7 @@ describe('ProjectsSection', () => {
         render(<ProjectsSection />)
 
         // Check titles
-        expect(screen.getByText(/CHAPTER 04 · TRANSMISSIONS/i)).toBeInTheDocument()
+        expect(screen.getByText(/CHAPTER 05 · TRANSMISSIONS/i)).toBeInTheDocument()
 
         // Test hover on a project card (first one)
         const card = screen.getByText(/Intelligent Platform for Hybrid Azure Kubernetes/i).closest('div')
