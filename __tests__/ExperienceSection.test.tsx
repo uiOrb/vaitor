@@ -24,7 +24,7 @@ describe('ExperienceSection', () => {
         expect(screen.getAllByText(/IBM/i).length).toBeGreaterThan(0)
 
         // Check for roles
-        expect(screen.getByText(/Software Developer/i)).toBeInTheDocument()
-        expect(screen.getByText(/DevOps Engineer/i)).toBeInTheDocument()
+        expect(screen.getAllByText(/DevSecOps Engineer/i).length).toBeGreaterThan(0)
+        expect(screen.getAllByText(/Associate Software Engineer/i).length).toBeGreaterThan(0)
     })
 })

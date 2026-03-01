@@ -14,6 +14,6 @@ describe('AboutSection', () => {
 
         // Check for biography content
         expect(screen.getByText(/I'm Reeve Lobo/i)).toBeInTheDocument()
-        expect(screen.getByText(/Software Developer at IBM/i)).toBeInTheDocument()
+        expect(screen.getByText(/Infrastructure Specialist at IBM/i)).toBeInTheDocument()
     })
 })
