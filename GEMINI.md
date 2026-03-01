@@ -62,6 +62,8 @@ npm run lint
 
 ### Testing Practices
 - **Jest & RTL:** Every major component should have a corresponding test in `__tests__/`.
+- **Three.js Mocking:** When testing components that use `@react-three/fiber` or `@react-three/drei`, always mock the `Canvas`, `useFrame`, and heavy 3D scenes. JSDOM does not support WebGL, so rendering real Three.js components will cause "Error creating WebGL context" failures.
+- **Dynamic Imports:** For components using `next/dynamic` (like those containing Three.js scenes), mock `next/dynamic` in tests to return a simple placeholder component.
 - **API Testing:** API routes (like the contact form) should be tested using `node-mocks-http`.
 
 ### Deployment
