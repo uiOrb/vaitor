@@ -9,7 +9,7 @@ interface SkillNode {
     id: string
     label: string
     position: [number, number, number]
-    category: 'Languages' | 'Frameworks' | 'DevOps' | 'Cloud'
+    category: 'Languages' | 'Frameworks' | 'DevOps' | 'Cloud' | 'Platform'
 }
 
 const skillNodes: SkillNode[] = [
@@ -18,6 +18,7 @@ const skillNodes: SkillNode[] = [
     { id: 'typescript', label: 'TypeScript', position: [-2.5, 3, 0], category: 'Languages' },
     { id: 'go', label: 'Go', position: [-5.5, -0.5, 0], category: 'Languages' },
     { id: 'bash', label: 'Bash', position: [-3.5, -2, 0], category: 'Languages' },
+    { id: 'powershell', label: 'PowerShell', position: [-4.5, 3.5, 0], category: 'Languages' },
 
     // Frameworks
     { id: 'nextjs', label: 'Next.js', position: [0, 2.5, 0], category: 'Frameworks' },
@@ -30,11 +31,18 @@ const skillNodes: SkillNode[] = [
     { id: 'docker', label: 'Docker', position: [5, 0.5, 0], category: 'DevOps' },
     { id: 'terraform', label: 'Terraform', position: [4, -1.5, 0], category: 'DevOps' },
     { id: 'github-actions', label: 'GitHub Actions', position: [2.5, -2.5, 0], category: 'DevOps' },
+    { id: 'argocd', label: 'ArgoCD', position: [5.5, -1.0, 0], category: 'DevOps' },
+    { id: 'helm', label: 'Helm', position: [4.5, 3.5, 0], category: 'DevOps' },
+    { id: 'azure-devops', label: 'Azure DevOps', position: [6.5, 1.5, 0], category: 'DevOps' },
 
     // Cloud
     { id: 'azure', label: 'Azure', position: [1.5, 3.5, 0], category: 'Cloud' },
-    { id: 'aks', label: 'AKS', position: [5.5, 2.5, 0], category: 'Cloud' },
-    { id: 'backstage', label: 'Backstage', position: [6.5, -0.5, 0], category: 'Cloud' },
+    { id: 'aws', label: 'AWS', position: [3.0, 4.5, 0], category: 'Cloud' },
+    { id: 'gcp', label: 'GCP', position: [0.5, 5.0, 0], category: 'Cloud' },
+
+    // Platform
+    { id: 'backstage', label: 'Backstage', position: [6.5, -0.5, 0], category: 'Platform' },
+    { id: 'port', label: 'Port', position: [7.5, -2.5, 0], category: 'Platform' },
 ]
 
 const categoryColors: Record<string, string> = {
@@ -42,17 +50,18 @@ const categoryColors: Record<string, string> = {
     Frameworks: '#6EE7B7',
     DevOps: '#FCD34D',
     Cloud: '#60A5FA',
+    Platform: '#A78BFA',
 }
 
 const connections: [number, number][] = [
-    [0, 1], [0, 2], [0, 3],       // Python connections
-    [4, 5], [4, 6], [5, 6],       // Framework web cluster
-    [6, 7], [3, 7],               // Node/gRPC/bash
-    [8, 9], [8, 10], [9, 10],     // K8s/Docker/Terraform
-    [10, 11], [7, 11],            // Terraform/GitHub Actions
-    [12, 4], [12, 8],             // Azure → Next.js, K8s
-    [13, 8], [14, 9],             // AKS → K8s, Backstage → Docker
-    [1, 4], [2, 9],               // TS → Next.js, Go → Docker
+    [0, 1], [0, 2], [0, 3], [0, 4], // Languages cluster
+    [5, 6], [5, 7], [6, 7],         // Framework cluster
+    [7, 8], [3, 8],                 // gRPC cluster
+    [9, 10], [9, 11], [10, 11],     // DevOps cluster
+    [9, 13], [9, 14], [11, 15],     // K8s extra connections
+    [16, 5], [16, 9], [17, 18],     // Cloud connections
+    [19, 10], [19, 20], [20, 13],   // Platform cluster
+    [1, 5], [2, 10], [12, 16],      // Cross-category
 ]
 
 function SkillNodeMesh({ node }: { node: SkillNode }) {
@@ -86,30 +95,35 @@ function SkillNodeMesh({ node }: { node: SkillNode }) {
             {hovered && (
                 <>
                     <pointLight color={color} intensity={2} distance={2} />
-                    <Html distanceFactor={10} center>
+                    <Html distanceFactor={20} center>
                         <div
                             style={{
-                                background: 'rgba(9,9,11,0.95)',
-                                border: `1px solid ${color}44`,
-                                borderRadius: '8px',
-                                padding: '6px 12px',
+                                background: 'rgba(9,9,11,0.98)',
+                                border: `1px solid ${color}66`,
+                                borderRadius: '12px',
+                                padding: '16px 32px',
                                 color: '#F5F5F7',
                                 fontFamily: 'Inter, sans-serif',
-                                fontSize: '12px',
-                                fontWeight: 500,
+                                fontSize: '24px',
+                                fontWeight: 700,
                                 whiteSpace: 'nowrap',
                                 pointerEvents: 'none',
-                                boxShadow: `0 0 16px ${color}33`,
+                                boxShadow: `0 0 32px ${color}44`,
+                                backdropFilter: 'blur(8px)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '6px',
                             }}
                         >
                             {node.label}
                             <div
                                 style={{
-                                    fontSize: '10px',
+                                    fontSize: '12px',
                                     color: color,
-                                    marginTop: '2px',
-                                    letterSpacing: '0.08em',
+                                    letterSpacing: '0.12em',
                                     textTransform: 'uppercase',
+                                    fontWeight: 500,
                                 }}
                             >
                                 {node.category}

@@ -7,10 +7,11 @@ import ScrollReveal from '../ScrollReveal'
 const SkillsCanvas = dynamic(() => import('../SkillsCanvas'), { ssr: false })
 
 const categories = [
-    { name: 'Languages', color: '#818CF8', items: ['Python', 'TypeScript', 'Go', 'Bash'] },
+    { name: 'Languages', color: '#818CF8', items: ['Python', 'TypeScript', 'Go', 'Bash', 'PowerShell'] },
     { name: 'Frameworks', color: '#6EE7B7', items: ['Next.js', 'React', 'Node.js', 'gRPC'] },
-    { name: 'DevOps', color: '#FCD34D', items: ['Kubernetes', 'Docker', 'Terraform', 'GitHub Actions'] },
-    { name: 'Cloud', color: '#60A5FA', items: ['Azure', 'AKS', 'Backstage', 'Azure Local'] },
+    { name: 'DevOps', color: '#FCD34D', items: ['Kubernetes', 'Docker', 'Terraform', 'GitHub Actions', 'ArgoCD', 'Helm', 'Azure DevOps'] },
+    { name: 'Cloud', color: '#60A5FA', items: ['Azure', 'AWS', 'GCP'] },
+    { name: 'Platform', color: '#60A5FA', items: ['Backstage', 'Port'] },
 ]
 
 export default function SkillsSection() {
