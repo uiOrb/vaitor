@@ -1,13 +1,12 @@
 'use client'
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import { PerspectiveCamera, Trail } from '@react-three/drei'
 import * as THREE from 'three'
 
 // Constants for orbital mechanics
 const MU = 200
-const RADIUS = 20
 const STATION_KEEPING_THRESHOLD = 0.5
 const THRUSTER_STRENGTH = 0.15
 
@@ -17,11 +16,13 @@ const THRUSTER_STRENGTH = 0.15
 function SatelliteModel({ 
     thrusterActive, 
     alignment, 
-    isHovered 
+    isHovered,
+    scale = 1
 }: { 
     thrusterActive: boolean, 
     alignment: THREE.Vector3,
-    isHovered: boolean
+    isHovered: boolean,
+    scale?: number
 }) {
     const group = useRef<THREE.Group>(null)
     const rotationSpeed = useRef(0)
@@ -55,7 +56,7 @@ function SatelliteModel({
     })
 
     return (
-        <group ref={group}>
+        <group ref={group} scale={[scale, scale, scale]}>
             {/* Main Bus - Octagonal core for high-tech look */}
             <mesh castShadow receiveShadow>
                 <cylinderGeometry args={[0.8, 0.9, 2, 8]} />
@@ -75,122 +76,65 @@ function SatelliteModel({
                     color="#D4AF37" 
                     metalness={1} 
                     roughness={0.15} 
-                    emissive="#443300" 
-                    emissiveIntensity={0.2} 
+                    emissive="#FFD700" 
+                    emissiveIntensity={0.3} 
                 />
             </mesh>
 
             {/* High-Gain Antenna Array */}
             <group position={[0, 1.4, 0]}>
-                {/* Main Parabolic Dish */}
                 <mesh rotation={[-Math.PI / 6, 0, 0]}>
                     <sphereGeometry args={[0.7, 32, 32, 0, Math.PI * 2, 0, Math.PI / 4]} />
-                    <meshStandardMaterial color="#A1A1AA" metalness={0.9} roughness={0.1} side={THREE.DoubleSide} />
+                    <meshStandardMaterial color="#D1D5DB" metalness={0.9} roughness={0.1} side={THREE.DoubleSide} />
                 </mesh>
-                {/* Feed Horn Assembly */}
                 <mesh position={[0, 0.4, 0.2]} rotation={[-Math.PI / 6, 0, 0]}>
                     <cylinderGeometry args={[0.02, 0.05, 0.4]} />
-                    <meshStandardMaterial color="#52525B" metalness={1} />
-                </mesh>
-                <mesh position={[0, 0.6, 0.3]} rotation={[-Math.PI / 6, 0, 0]}>
-                    <sphereGeometry args={[0.08, 16, 16]} />
-                    <meshStandardMaterial color="#D4AF37" metalness={1} />
+                    <meshStandardMaterial color="#A1A1AA" metalness={1} />
                 </mesh>
             </group>
-
-            {/* Low-Gain Omni-directional Antennas */}
-            <mesh position={[0.5, -1, 0.5]}>
-                <cylinderGeometry args={[0.01, 0.01, 0.8]} />
-                <meshStandardMaterial color="#71717A" />
-            </mesh>
-            <mesh position={[-0.5, -1, -0.5]}>
-                <cylinderGeometry args={[0.01, 0.01, 0.8]} />
-                <meshStandardMaterial color="#71717A" />
-            </mesh>
 
             {/* Advanced Solar Arrays */}
             {[-1, 1].map((side) => (
                 <group key={side} position={[side * 0.9, 0, 0]}>
-                    {/* Structural Boom / Truss */}
                     <mesh rotation={[0, 0, Math.PI / 2]} position={[side * 0.5, 0, 0]}>
                         <cylinderGeometry args={[0.08, 0.05, 1]} />
-                        <meshStandardMaterial color="#52525B" metalness={1} />
+                        <meshStandardMaterial color="#71717A" metalness={1} />
                     </mesh>
                     
-                    {/* Main Panel Panels with structural ribbing */}
                     <group position={[side * 2.5, 0, 0]}>
-                        {/* Panel Background */}
                         <mesh>
                             <boxGeometry args={[4, 1.4, 0.08]} />
                             <meshStandardMaterial color="#18181B" metalness={0.5} roughness={0.5} />
                         </mesh>
-                        {/* Photovoltaic Cells (Blue-ish Tint) */}
                         <mesh position={[0, 0, 0.05]}>
                             <planeGeometry args={[3.8, 1.2]} />
                             <meshStandardMaterial 
-                                color="#1E3A8A" 
-                                emissive="#001133" 
-                                emissiveIntensity={0.5} 
+                                color="#2563EB" 
+                                emissive="#0033FF" 
+                                emissiveIntensity={0.8} 
                                 metalness={0.9} 
                                 roughness={0.1} 
                             />
-                        </mesh>
-                        {/* Grid/Honeycomb Detail */}
-                        <mesh position={[0, 0, 0.06]}>
-                            <planeGeometry args={[3.8, 1.2]} />
-                            <meshBasicMaterial color="#60A5FA" wireframe transparent opacity={0.3} />
                         </mesh>
                     </group>
                 </group>
             ))}
 
-            {/* Star Tracker / Optical Sensors */}
-            <group position={[0.4, 1.1, -0.4]} rotation={[0, Math.PI / 4, 0]}>
-                <mesh>
-                    <cylinderGeometry args={[0.1, 0.1, 0.2]} />
-                    <meshStandardMaterial color="#18181B" metalness={1} />
-                </mesh>
-                <mesh position={[0, 0.11, 0]}>
-                    <circleGeometry args={[0.08, 16]} />
-                    <meshBasicMaterial color="#000000" />
-                </mesh>
-            </group>
-
-            {/* RCS (Reaction Control System) Thruster Clusters */}
+            {/* Thruster Clusters */}
             {[[-1, 1], [1, 1], [-1, -1], [1, -1]].map(([x, z], idx) => (
                 <group key={idx} position={[x * 0.6, -0.8, z * 0.6]}>
-                    {/* Thruster Block */}
                     <mesh>
                         <boxGeometry args={[0.2, 0.2, 0.2]} />
                         <meshStandardMaterial color="#3F3F46" />
                     </mesh>
-                    {/* Nozzles */}
-                    <mesh position={[0, -0.15, 0]} rotation={[Math.PI, 0, 0]}>
-                        <cylinderGeometry args={[0.02, 0.05, 0.15]} />
-                        <meshStandardMaterial color="#52525B" metalness={1} />
-                    </mesh>
                     {thrusterActive && (
-                        <mesh position={[0, -0.3, 0]}>
-                            <coneGeometry args={[0.05, 0.3, 8]} />
-                            <meshBasicMaterial color="#60A5FA" transparent opacity={0.8} />
+                        <mesh position={[0, -0.2, 0]}>
+                            <coneGeometry args={[0.08, 0.4, 8]} />
+                            <meshBasicMaterial color="#60A5FA" transparent opacity={0.9} />
                         </mesh>
                     )}
                 </group>
             ))}
-
-            {/* Main Propulsion Engine Nozzle */}
-            <group position={[0, -1.1, 0]}>
-                <mesh rotation={[Math.PI, 0, 0]}>
-                    <cylinderGeometry args={[0.1, 0.3, 0.4]} />
-                    <meshStandardMaterial color="#27272A" metalness={1} />
-                </mesh>
-                {thrusterActive && (
-                    <mesh position={[0, -0.4, 0]}>
-                        <coneGeometry args={[0.2, 0.8, 16]} />
-                        <meshBasicMaterial color="#93C5FD" transparent opacity={0.6} />
-                    </mesh>
-                )}
-            </group>
         </group>
     )
 }
@@ -199,10 +143,18 @@ function SatelliteModel({
  * Main Orbital Satellite Engine
  */
 export default function SatelliteOrbitalScene() {
+    const { size, viewport } = useThree()
     const groupRef = useRef<THREE.Group>(null)
-    const center = useMemo(() => new THREE.Vector3(-15, 0, 0), [])
-    const pos = useRef(new THREE.Vector3(center.x + RADIUS, 0, 0))
-    const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / RADIUS)))
+    
+    // Responsive settings
+    const isMobile = size.width < 768
+    const radius = isMobile ? 12 : 18
+    const satScale = isMobile ? 0.6 : 1.1
+    const horizontalShift = isMobile ? -5 : -12
+    
+    const center = useMemo(() => new THREE.Vector3(horizontalShift, 0, 0), [horizontalShift])
+    const pos = useRef(new THREE.Vector3(center.x + radius, 0, 0))
+    const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / radius)))
     const targetPos = useRef(new THREE.Vector3().copy(pos.current))
     
     const [thrusterActive, setThrusterActive] = useState(false)
@@ -231,12 +183,14 @@ export default function SatelliteOrbitalScene() {
     useFrame((state, delta) => {
         const dt = Math.min(delta, 0.1)
 
-        const arcRange = Math.PI * 0.55
+        // Target Tracking
+        const arcRange = isMobile ? Math.PI * 0.4 : Math.PI * 0.6
         const targetAngle = (scrollOffset.current * arcRange) - arcRange / 2
-        const tx = center.x + Math.cos(targetAngle) * RADIUS
-        const tz = center.z + Math.sin(targetAngle) * RADIUS
+        const tx = center.x + Math.cos(targetAngle) * radius
+        const tz = center.z + Math.sin(targetAngle) * radius
         targetPos.current.set(tx, 0, tz)
 
+        // Physics
         const rVec = new THREE.Vector3().copy(pos.current).sub(center)
         const rMag = rVec.length()
         const gravity = rVec.normalize().multiplyScalar(-MU / (rMag * rMag))
@@ -257,16 +211,17 @@ export default function SatelliteOrbitalScene() {
             groupRef.current.position.copy(pos.current)
         }
 
-        state.camera.lookAt(-5, 0, 0)
+        // Responsive camera look-at
+        state.camera.lookAt(isMobile ? -2 : -5, 0, 0)
 
         if (thrusterActive !== thrusting) setThrusterActive(thrusting)
     })
 
     return (
         <>
-            <ambientLight intensity={0.7} />
-            <pointLight position={[30, 30, 30]} intensity={2.5} color="#FFFFFF" />
-            <pointLight position={[-30, -15, -15]} intensity={1.5} color="#818CF8" />
+            <ambientLight intensity={1.2} />
+            <pointLight position={[30, 30, 30]} intensity={3} color="#FFFFFF" />
+            <pointLight position={[-30, -15, -15]} intensity={2} color="#818CF8" />
 
             <group 
                 ref={groupRef}
@@ -274,7 +229,7 @@ export default function SatelliteOrbitalScene() {
                 onPointerOut={() => setIsHovered(false)}
             >
                 <Trail
-                    width={2.5}
+                    width={isMobile ? 1.5 : 3}
                     length={15}
                     color={new THREE.Color('#818CF8')}
                     attenuation={(t) => t * t}
@@ -283,11 +238,16 @@ export default function SatelliteOrbitalScene() {
                         thrusterActive={thrusterActive} 
                         alignment={vel.current} 
                         isHovered={isHovered}
+                        scale={satScale}
                     />
                 </Trail>
             </group>
 
-            <PerspectiveCamera makeDefault position={[10, 8, 32]} fov={40} />
+            <PerspectiveCamera 
+                makeDefault 
+                position={isMobile ? [0, 5, 25] : [10, 8, 32]} 
+                fov={isMobile ? 50 : 40} 
+            />
         </>
     )
 }
