@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import ContactSection from '@/components/sections/ContactSection'
 
 // Use absolute path for mocking
@@ -44,10 +44,56 @@ describe('ContactSection', () => {
         fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } })
         fireEvent.change(screen.getByLabelText(/Message/i), { target: { value: 'Hello!' } })
 
-        fireEvent.click(screen.getByText(/SEND TRANSMISSION/i))
+        const submitBtn = screen.getByText(/SEND TRANSMISSION/i)
+        fireEvent.click(submitBtn)
 
         await waitFor(() => {
             expect(screen.getByText(/Transmission received/i)).toBeInTheDocument()
+        })
+    })
+
+    it('handles form submission error', async () => {
+        const errorText = 'API Failure'
+        ; (global.fetch as jest.Mock).mockResolvedValueOnce({
+            ok: false,
+            json: async () => ({ error: errorText }),
+        })
+
+        render(<ContactSection />)
+
+        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } })
+        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText(/Message/i), { target: { value: 'Hello!' } })
+
+        fireEvent.click(screen.getByText(/SEND TRANSMISSION/i))
+
+        await waitFor(() => {
+            expect(screen.getByText(errorText)).toBeInTheDocument()
+        })
+    })
+
+    it('shows loading state during submission', async () => {
+        let resolveFetch: any
+        const fetchPromise = new Promise((resolve) => {
+            resolveFetch = resolve
+        })
+        ; (global.fetch as jest.Mock).mockReturnValue(fetchPromise)
+
+        render(<ContactSection />)
+
+        fireEvent.change(screen.getByLabelText(/Name/i), { target: { value: 'John Doe' } })
+        fireEvent.change(screen.getByLabelText(/Email/i), { target: { value: 'john@example.com' } })
+        fireEvent.change(screen.getByLabelText(/Message/i), { target: { value: 'Hello!' } })
+
+        fireEvent.click(screen.getByText(/SEND TRANSMISSION/i))
+
+        expect(screen.getByText(/Transmitting/i)).toBeInTheDocument()
+
+        await act(async () => {
+            resolveFetch({
+                ok: true,
+                json: async () => ({ success: true }),
+            })
         })
     })
 })
