@@ -1,19 +1,33 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, forwardRef } from '@testing-library/react'
 import ProjectsSection from '@/components/sections/ProjectsSection'
 
-// Use absolute path for mocking
-jest.mock('@/components/ScrollReveal', () => ({ children }: any) => <div data-testid="scroll-reveal">{children}</div>)
+// Use absolute path for mocking with forwardRef to avoid ref warnings
+jest.mock('@/components/ScrollReveal', () => {
+    const { forwardRef } = require('react')
+    return forwardRef(({ children }: any, ref: any) => (
+        <div data-testid="scroll-reveal" ref={ref}>{children}</div>
+    ))
+})
 
-// Mock Framer Motion
-jest.mock('framer-motion', () => ({
-    motion: {
-        div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
-        h2: ({ children, ...props }: any) => <h2 {...props}>{children}</h2>,
-        span: ({ children, ...props }: any) => <span {...props}>{children}</span>,
-    },
-    useMotionValue: () => ({ set: jest.fn(), get: () => 0 }),
-    useTransform: () => 0,
-}))
+// Mock Framer Motion with forwardRef for motion.div
+jest.mock('framer-motion', () => {
+    const { forwardRef } = require('react')
+    return {
+        motion: {
+            div: forwardRef(({ children, whileHover, ...props }: any, ref: any) => (
+                <div {...props} ref={ref}>{children}</div>
+            )),
+            h2: forwardRef(({ children, ...props }: any, ref: any) => (
+                <h2 {...props} ref={ref}>{children}</h2>
+            )),
+            span: forwardRef(({ children, ...props }: any, ref: any) => (
+                <span {...props} ref={ref}>{children}</span>
+            )),
+        },
+        useMotionValue: () => ({ set: jest.fn(), get: () => 0 }),
+        useTransform: () => 0,
+    }
+})
 
 describe('ProjectsSection', () => {
     it('renders and handles card interactions', () => {
