@@ -2,59 +2,116 @@
 
 import React, { useRef, useState, useMemo, useEffect } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
-import { PerspectiveCamera, Trail, Sphere, MeshDistortMaterial } from '@react-three/drei'
+import { PerspectiveCamera, Trail, Float } from '@react-three/drei'
 import * as THREE from 'three'
+import { StarField } from './SpaceScene'
 
 // Constants for orbital mechanics
-const MU = 250 // Slightly increased for the mass of Mars
-const STATION_KEEPING_THRESHOLD = 0.5
-const THRUSTER_STRENGTH = 0.15
+const MU = 150 
+const STATION_KEEPING_THRESHOLD = 0.3
+const THRUSTER_STRENGTH = 0.12
 
 /**
- * Procedural Mars Model
+ * Ultra-Detailed Procedural Mars
  */
 function Mars({ radius }: { radius: number }) {
-    const marsRef = useRef<THREE.Mesh>(null)
+    const marsRef = useRef<THREE.Group>(null)
+    const surfaceRef = useRef<THREE.Mesh>(null)
     
+    // Generate procedural "rocks" and "craters" once
+    const surfaceFeatures = useMemo(() => {
+        const features = []
+        // Add pebbles/rocks
+        for (let i = 0; i < 40; i++) {
+            const phi = Math.acos(-1 + (2 * i) / 40)
+            const theta = Math.sqrt(40 * Math.PI) * phi
+            const x = Math.cos(theta) * Math.sin(phi)
+            const y = Math.sin(theta) * Math.sin(phi)
+            const z = Math.cos(phi)
+            
+            const scale = 0.05 + Math.random() * 0.15
+            features.push({
+                pos: new THREE.Vector3(x, y, z).multiplyScalar(radius),
+                scale: [scale, scale * (0.5 + Math.random()), scale],
+                rotation: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
+                type: 'rock'
+            })
+        }
+        // Add a few larger craters (depressions)
+        for (let i = 0; i < 8; i++) {
+            const phi = Math.random() * Math.PI
+            const theta = Math.random() * Math.PI * 2
+            features.push({
+                pos: new THREE.Vector3(
+                    Math.sin(phi) * Math.cos(theta),
+                    Math.sin(phi) * Math.sin(theta),
+                    Math.cos(phi)
+                ).multiplyScalar(radius - 0.02),
+                scale: [0.4 + Math.random() * 0.6, 0.1, 0.4 + Math.random() * 0.6],
+                rotation: [phi, theta, 0],
+                type: 'crater'
+            })
+        }
+        return features
+    }, [radius])
+
     useFrame((state, delta) => {
         if (marsRef.current) {
-            marsRef.current.rotation.y += delta * 0.1 // Realistic slow rotation
+            marsRef.current.rotation.y += delta * 0.05
         }
     })
 
     return (
-        <group>
-            {/* Mars Surface */}
-            <mesh ref={marsRef}>
-                <sphereGeometry args={[radius, 64, 64]} />
+        <group ref={marsRef}>
+            {/* Main Surface with high segments for light response */}
+            <mesh ref={surfaceRef} castShadow receiveShadow>
+                <sphereGeometry args={[radius, 128, 128]} />
                 <meshStandardMaterial 
-                    color="#C1440E" // Martian Rust Red
-                    roughness={0.8}
-                    metalness={0.1}
-                    emissive="#441100"
-                    emissiveIntensity={0.2}
-                />
-            </mesh>
-            
-            {/* Atmosphere / Glow */}
-            <mesh scale={[1.02, 1.02, 1.02]}>
-                <sphereGeometry args={[radius, 32, 32]} />
-                <meshStandardMaterial 
-                    color="#E27B58"
-                    transparent 
-                    opacity={0.15}
-                    side={THREE.BackSide}
+                    color="#AA4A30" // Desaturated Rust
+                    roughness={0.9} // Chalky/Matte
+                    metalness={0.05}
+                    emissive="#220800"
+                    emissiveIntensity={0.1}
                 />
             </mesh>
 
-            {/* Subtle Surface Detail (Procedural shadows/craters) */}
-            <mesh rotation={[0.5, 0.5, 0.5]}>
-                <sphereGeometry args={[radius + 0.01, 32, 32]} />
+            {/* Geological Features: Rocks and Craters */}
+            {surfaceFeatures.map((f, i) => (
+                <group key={i} position={f.pos} rotation={f.rotation as any}>
+                    {f.type === 'rock' ? (
+                        <mesh scale={f.scale as any}>
+                            <dodecahedronGeometry args={[1, 0]} />
+                            <meshStandardMaterial color="#7C3A2D" roughness={1} />
+                        </mesh>
+                    ) : (
+                        <mesh scale={f.scale as any} rotation={[Math.PI / 2, 0, 0]}>
+                            <torusGeometry args={[1, 0.05, 8, 32]} />
+                            <meshStandardMaterial color="#5C2A1F" roughness={1} transparent opacity={0.4} />
+                        </mesh>
+                    )}
+                </group>
+            ))}
+            
+            {/* Thin Atmosphere (Dusty Haze) */}
+            <mesh scale={[1.05, 1.05, 1.05]}>
+                <sphereGeometry args={[radius, 64, 64]} />
                 <meshStandardMaterial 
-                    color="#8B3103"
-                    transparent
-                    opacity={0.3}
-                    wireframe
+                    color="#E27B58"
+                    transparent 
+                    opacity={0.1}
+                    side={THREE.BackSide}
+                    blending={THREE.AdditiveBlending}
+                />
+            </mesh>
+
+            {/* Far Dusty Haze / Glow */}
+            <mesh scale={[1.2, 1.2, 1.2]}>
+                <sphereGeometry args={[radius, 32, 32]} />
+                <meshStandardMaterial 
+                    color="#C1440E"
+                    transparent 
+                    opacity={0.03}
+                    side={THREE.BackSide}
                 />
             </mesh>
         </group>
@@ -78,41 +135,33 @@ const SatelliteModel = React.memo(({
     const group = useRef<THREE.Group>(null)
     const rotationSpeed = useRef(0)
     const randomRotationAxis = useMemo(() => new THREE.Vector3(Math.random(), Math.random(), Math.random()).normalize(), [])
-    const randomRotationSpeed = useMemo(() => 0.1 + Math.random() * 0.3, [])
+    const randomRotationSpeed = useMemo(() => 0.1 + Math.random() * 0.2, [])
 
     useFrame((state, delta) => {
         if (!group.current) return
-        
         if (isHovered) {
             rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 15, delta * 5)
             group.current.rotation.y += rotationSpeed.current * delta
             group.current.rotation.z += rotationSpeed.current * 0.5 * delta
         } else {
             rotationSpeed.current = THREE.MathUtils.lerp(rotationSpeed.current, 0, delta * 2)
-            if (rotationSpeed.current > 0.01) {
-                group.current.rotation.y += rotationSpeed.current * delta
-            }
+            if (rotationSpeed.current > 0.01) group.current.rotation.y += rotationSpeed.current * delta
             group.current.rotateOnAxis(randomRotationAxis, randomRotationSpeed * delta)
         }
     })
 
     return (
         <group ref={group} scale={[scale, scale, scale]}>
-            {/* Central Bus */}
             <mesh castShadow receiveShadow>
                 <boxGeometry args={[1.6, 2.2, 1.6]} />
                 <meshStandardMaterial color="#2D2D30" metalness={0.7} roughness={0.4} />
             </mesh>
-            
-            {/* Gold Foil */}
             <group position={[0, -0.4, 0]}>
                 <mesh scale={[1.02, 0.6, 1.02]}>
                     <boxGeometry args={[1.6, 1, 1.6]} />
                     <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.3} emissive="#443300" emissiveIntensity={0.4} />
                 </mesh>
             </group>
-
-            {/* Solar Arrays */}
             {[-1, 1].map((side) => (
                 <group key={side} position={[side * 0.8, 0, 0]}>
                     <mesh rotation={[0, 0, Math.PI / 2]} position={[side * 0.2, 0, 0]}>
@@ -131,18 +180,14 @@ const SatelliteModel = React.memo(({
                     </group>
                 </group>
             ))}
-
-            {/* Communication Dish */}
             <group position={[0, 1.1, 0.4]} rotation={[Math.PI / 6, 0, 0]}>
                 <mesh>
                     <sphereGeometry args={[0.9, 32, 32, 0, Math.PI * 2, 0, Math.PI / 6]} />
                     <meshStandardMaterial color="#F1F5F9" metalness={0.1} roughness={0.6} side={THREE.DoubleSide} />
                 </mesh>
             </group>
-
-            {/* Thrusters */}
-            {[[-0.8, 1.1, 0.8], [0.8, 1.1, 0.8], [-0.8, -1.1, 0.8], [0.8, -1.1, 0.8]].map((pos, i) => (
-                <group key={i} position={pos}>
+            {[[-0.8, 1.1, 0.8], [0.8, 1.1, 0.8], [-0.8, -1.1, 0.8], [0.8, -1.1, 0.8]].map((p, i) => (
+                <group key={i} position={p}>
                     <mesh rotation={[Math.PI / 4, 0, 0]}>
                         <cylinderGeometry args={[0.02, 0.08, 0.2]} />
                         <meshStandardMaterial color="#475569" metalness={1} roughness={0.3} />
@@ -163,21 +208,7 @@ SatelliteModel.displayName = 'SatelliteModel'
 /**
  * Individual Satellite Instance in Orbit
  */
-function OrbitalSatellite({ 
-    center, 
-    radius, 
-    offset, 
-    scale, 
-    scrollOffset, 
-    isMobile 
-}: { 
-    center: THREE.Vector3, 
-    radius: number, 
-    offset: number, 
-    scale: number, 
-    scrollOffset: React.MutableRefObject<number>,
-    isMobile: boolean
-}) {
+function OrbitalSatellite({ center, radius, offset, scale, scrollOffset, isMobile }: any) {
     const groupRef = useRef<THREE.Group>(null)
     const pos = useRef(new THREE.Vector3(center.x + radius, 0, 0))
     const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / radius)))
@@ -187,8 +218,7 @@ function OrbitalSatellite({
 
     useFrame((_state, delta) => {
         const dt = Math.min(delta, 0.1)
-
-        const arcRange = isMobile ? Math.PI * 0.5 : Math.PI * 0.8
+        const arcRange = isMobile ? Math.PI * 0.6 : Math.PI * 1.0
         const targetAngle = (scrollOffset.current * arcRange) - (arcRange / 2) + offset
         
         const tx = center.x + Math.cos(targetAngle) * radius
@@ -201,36 +231,22 @@ function OrbitalSatellite({
         
         const distToTarget = pos.current.distanceTo(targetPos.current)
         let thrusting = false
-        
         if (distToTarget > STATION_KEEPING_THRESHOLD) {
             thrusting = true
             const direction = new THREE.Vector3().copy(targetPos.current).sub(pos.current).normalize()
             vel.current.add(direction.multiplyScalar(THRUSTER_STRENGTH * dt))
         }
-
         vel.current.add(gravity.multiplyScalar(dt))
         pos.current.add(new THREE.Vector3().copy(vel.current).multiplyScalar(dt))
 
-        if (groupRef.current) {
-            groupRef.current.position.copy(pos.current)
-        }
-
+        if (groupRef.current) groupRef.current.position.copy(pos.current)
         if (thrusterActive !== thrusting) setThrusterActive(thrusting)
     })
 
     return (
-        <group 
-            ref={groupRef}
-            onPointerOver={() => setIsHovered(true)}
-            onPointerOut={() => setIsHovered(false)}
-        >
-            <Trail width={scale * 5} length={10} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
-                <SatelliteModel 
-                    thrusterActive={thrusterActive} 
-                    alignment={vel.current} 
-                    isHovered={isHovered}
-                    scale={scale}
-                />
+        <group ref={groupRef} onPointerOver={() => setIsHovered(true)} onPointerOut={() => setIsHovered(false)}>
+            <Trail width={scale * 4} length={8} color={new THREE.Color('#818CF8')} attenuation={(t) => t * t}>
+                <SatelliteModel thrusterActive={thrusterActive} alignment={vel.current} isHovered={isHovered} scale={scale} />
             </Trail>
         </group>
     )
@@ -242,19 +258,18 @@ function OrbitalSatellite({
 export default function SatelliteOrbitalScene() {
     const { size } = useThree()
     const scrollOffset = useRef(0)
-    
     const isMobile = size.width < 768
-    // Increased orbital radius to make room for Mars
-    const radius = isMobile ? 14 : 22
-    const center = useMemo(() => new THREE.Vector3(0, 0, 0), [])
     
-    // Scale reduced significantly (~7x smaller from previous 1.2 -> 0.17)
-    const satScale = isMobile ? 0.1 : 0.18
+    // Mars is 3x smaller than previous version (prev was 5 mobile / 8 desktop)
+    const marsRadius = isMobile ? 1.6 : 2.6
+    const radius = isMobile ? 8 : 12 // Orbit reduced to match smaller Mars
+    const center = useMemo(() => new THREE.Vector3(0, 0, 0), [])
+    const satScale = isMobile ? 0.06 : 0.12
 
     const fleet = useMemo(() => [
         { id: 1, offset: 0, scale: satScale },
-        { id: 2, offset: -0.5, scale: satScale * 0.8 },
-        { id: 3, offset: 0.5, scale: satScale * 0.8 },
+        { id: 2, offset: -0.6, scale: satScale * 0.8 },
+        { id: 3, offset: 0.6, scale: satScale * 0.8 },
     ], [satScale])
     
     useEffect(() => {
@@ -280,12 +295,14 @@ export default function SatelliteOrbitalScene() {
 
     return (
         <>
-            <ambientLight intensity={1.2} />
-            <pointLight position={[50, 50, 50]} intensity={3} color="#FFFFFF" />
-            <pointLight position={[-50, -20, -20]} intensity={2} color="#818CF8" />
+            <ambientLight intensity={0.8} />
+            <pointLight position={[50, 50, 50]} intensity={2.5} color="#FFFFFF" />
+            <pointLight position={[-20, 10, -20]} intensity={1.5} color="#E27B58" />
             
-            {/* Centerpiece: Mars */}
-            <Mars radius={isMobile ? 5 : 8} />
+            <StarField />
+            
+            {/* Ultra-Detailed Miniature Mars */}
+            <Mars radius={marsRadius} />
 
             {/* Satellite Fleet */}
             {fleet.map((sat) => (
@@ -302,7 +319,7 @@ export default function SatelliteOrbitalScene() {
 
             <PerspectiveCamera 
                 makeDefault 
-                position={isMobile ? [0, 10, 35] : [0, 15, 45]} 
+                position={isMobile ? [0, 6, 20] : [0, 8, 30]} 
                 fov={40} 
             />
         </>

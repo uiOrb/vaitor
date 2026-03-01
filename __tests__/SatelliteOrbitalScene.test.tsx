@@ -4,7 +4,12 @@ import SatelliteOrbitalScene from '@/components/three/SatelliteOrbitalScene'
 // Mock react-three-fiber and drei
 jest.mock('@react-three/fiber', () => ({
     useFrame: jest.fn(),
-    useThree: () => ({ camera: { lookAt: jest.fn() }, mouse: { x: 0, y: 0 }, size: { width: 1000, height: 1000 } }),
+    useThree: () => ({ 
+        camera: { lookAt: jest.fn() }, 
+        mouse: { x: 0, y: 0 }, 
+        size: { width: 1000, height: 1000 },
+        viewport: { width: 10, height: 10, factor: 1 }
+    }),
 }))
 
 jest.mock('@react-three/drei', () => ({
@@ -28,10 +33,11 @@ jest.mock('three', () => {
 
 describe('SatelliteOrbitalScene', () => {
     it('renders the satellite scene components', () => {
-        const { getByTestId } = render(<SatelliteOrbitalScene />)
+        const { getAllByTestId, getByTestId } = render(<SatelliteOrbitalScene />)
         
-        // Check for mocked components from drei
-        expect(getByTestId('mock-trail')).toBeInTheDocument()
+        // Check for multiple trails (one for each satellite in the fleet)
+        const trails = getAllByTestId('mock-trail')
+        expect(trails.length).toBeGreaterThan(0)
         expect(getByTestId('mock-camera')).toBeInTheDocument()
     })
 })
