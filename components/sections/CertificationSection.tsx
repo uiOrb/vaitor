@@ -264,60 +264,83 @@ export default function CertificationSection() {
             ref={sectionRef}
             className="section spotlight-section"
             style={{
-                background: '#09090B',
+                background: '#050508',
                 position: 'relative',
                 overflow: 'hidden',
             }}
         >
-            {/* Base Grid */}
+            {/* 1. Deep Space Base (Static Stars) */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
                     backgroundImage: `
-                        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px)
+                        radial-gradient(1px 1px at 10% 10%, #fff, transparent),
+                        radial-gradient(1px 1px at 20% 50%, #fff, transparent),
+                        radial-gradient(1.5px 1.5px at 40% 80%, #fff, transparent),
+                        radial-gradient(1px 1px at 60% 20%, #fff, transparent),
+                        radial-gradient(1.5px 1.5px at 80% 40%, #fff, transparent),
+                        radial-gradient(1px 1px at 90% 70%, #fff, transparent)
                     `,
-                    backgroundSize: '40px 40px',
+                    backgroundSize: '250px 250px',
+                    opacity: 0.1,
                     pointerEvents: 'none',
                 }}
             />
 
-            {/* Noise Texture */}
+            {/* 2. Nebula Glows (Ambient) */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    opacity: 0.03,
+                    background: `
+                        radial-gradient(circle at 30% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 80%, rgba(139, 92, 246, 0.05) 0%, transparent 50%)
+                    `,
                     pointerEvents: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
                 }}
             />
 
-            {/* Glowing Grid (Masked by mouse) */}
+            {/* 3. Upclose Stars (Interactive - Masked by Mouse) */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
                     backgroundImage: `
-                        linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)
+                        radial-gradient(2px 2px at 15% 15%, #fff, transparent),
+                        radial-gradient(2px 2px at 35% 45%, #fff, transparent),
+                        radial-gradient(2.5px 2.5px at 55% 75%, #fff, transparent),
+                        radial-gradient(2px 2px at 75% 25%, #fff, transparent),
+                        radial-gradient(3px 3px at 85% 55%, #fff, transparent),
+                        radial-gradient(2px 2px at 45% 15%, #fff, transparent)
                     `,
-                    backgroundSize: '40px 40px',
-                    maskImage: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
-                    WebkitMaskImage: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
+                    backgroundSize: '300px 300px',
+                    maskImage: `radial-gradient(450px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
+                    WebkitMaskImage: `radial-gradient(450px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
                     opacity: opacity,
+                    filter: 'blur(0.5px) drop-shadow(0 0 4px rgba(255,255,255,0.8))',
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',
                 }}
             />
 
-            {/* Spotlight Overlay */}
+            {/* 4. Cosmic Dust / Noise */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 80%)`,
+                    opacity: 0.02,
+                    pointerEvents: 'none',
+                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+                }}
+            />
+
+            {/* 5. The Spotlight Reveal */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.08), transparent 80%)`,
                     opacity: opacity,
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',
