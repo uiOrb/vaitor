@@ -21,10 +21,10 @@ export default function SkillsSection() {
         const handleMouseMove = (e: MouseEvent) => {
             if (!sectionRef.current) return
             const rect = sectionRef.current.getBoundingClientRect()
-            setMousePos({
-                x: e.clientX - rect.left,
-                y: e.clientY - rect.top,
-            })
+            const x = e.clientX - rect.left
+            const y = e.clientY - rect.top
+            sectionRef.current.style.setProperty('--mouse-x', `${x}px`)
+            sectionRef.current.style.setProperty('--mouse-y', `${y}px`)
         }
 
         const handleMouseEnter = () => setOpacity(1)
@@ -50,7 +50,7 @@ export default function SkillsSection() {
         <section
             id="systems"
             ref={sectionRef}
-            className="section"
+            className="section spotlight-section"
             style={{
                 background: '#09090B',
                 position: 'relative',
@@ -58,16 +58,34 @@ export default function SkillsSection() {
                 minHeight: '100vh',
             }}
         >
-            {/* Grid Background */}
+            {/* Base Grid */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
                     backgroundImage: `
-                        linear-gradient(to right, rgba(255,255,255,0.05) 1px, transparent 1px),
-                        linear-gradient(to bottom, rgba(255,255,255,0.05) 1px, transparent 1px)
+                        linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px)
                     `,
                     backgroundSize: '40px 40px',
+                    pointerEvents: 'none',
+                }}
+            />
+
+            {/* Glowing Grid (Masked by mouse) */}
+            <div
+                style={{
+                    position: 'absolute',
+                    inset: 0,
+                    backgroundImage: `
+                        linear-gradient(to right, rgba(255,255,255,0.15) 1px, transparent 1px),
+                        linear-gradient(to bottom, rgba(255,255,255,0.15) 1px, transparent 1px)
+                    `,
+                    backgroundSize: '40px 40px',
+                    maskImage: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
+                    WebkitMaskImage: `radial-gradient(400px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
+                    opacity: opacity,
+                    transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',
                 }}
             />
@@ -77,7 +95,7 @@ export default function SkillsSection() {
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    background: `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.08), transparent 80%)`,
+                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.06), transparent 80%)`,
                     opacity: opacity,
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',
