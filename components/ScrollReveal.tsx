@@ -22,7 +22,8 @@ const ScrollReveal = forwardRef<HTMLDivElement, ScrollRevealProps>(({
 
     useEffect(() => {
         const el = internalRef.current
-        // el is always defined here if rendered
+        if (!el) return
+
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
