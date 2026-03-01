@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 import './globals.css'
+import { Analytics } from '@vercel/analytics/next'
 
 const inter = localFont({
   src: './fonts/Inter-Variable.ttf',
@@ -71,6 +72,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${dmSerif.variable}`}>
       <body suppressHydrationWarning>
         {children}
+        <Analytics />
       </body>
     </html>
   )
