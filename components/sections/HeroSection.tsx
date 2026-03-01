@@ -80,6 +80,7 @@ export default function HeroSection() {
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, delay: 3.0, ease: [0.22, 1, 0.36, 1] }}
+                    className="hero-wordmark"
                     style={{
                         position: 'absolute',
                         top: '80px',
@@ -232,6 +233,14 @@ export default function HeroSection() {
         @keyframes scrollBounce {
           0%, 100% { transform: translateY(0); opacity: 1; }
           50% { transform: translateY(6px); opacity: 0.5; }
+        }
+        @media (max-width: 768px) {
+          .hero-wordmark {
+            top: 60px !important;
+          }
+          h1 {
+            line-height: 1.2 !important;
+          }
         }
       `}</style>
         </section>

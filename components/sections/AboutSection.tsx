@@ -135,6 +135,7 @@ export default function AboutSection() {
                     {/* Right: Abstract sphere (CSS-based) */}
                     <ScrollReveal delay={200} style={{ display: 'flex', justifyContent: 'center' }}>
                         <div
+                            className="sphere-wrapper"
                             style={{
                                 position: 'relative',
                                 width: '380px',
@@ -146,6 +147,7 @@ export default function AboutSection() {
                         >
                             {/* Outer orbit ring */}
                             <div
+                                className="sphere-ring-outer"
                                 style={{
                                     position: 'absolute',
                                     width: '340px',
@@ -157,6 +159,7 @@ export default function AboutSection() {
                             />
                             {/* Middle orbit ring */}
                             <div
+                                className="sphere-ring-middle"
                                 style={{
                                     position: 'absolute',
                                     width: '260px',
@@ -168,6 +171,7 @@ export default function AboutSection() {
                             />
                             {/* Sphere */}
                             <div
+                                className="sphere-core"
                                 style={{
                                     width: '180px',
                                     height: '180px',
@@ -179,6 +183,7 @@ export default function AboutSection() {
                             />
                             {/* Orbiting dot */}
                             <div
+                                className="sphere-orbit-dot"
                                 style={{
                                     position: 'absolute',
                                     width: '340px',
@@ -226,7 +231,27 @@ export default function AboutSection() {
         @media (max-width: 768px) {
           .about-grid {
             grid-template-columns: 1fr !important;
-            gap: 48px !important;
+            gap: 64px !important;
+          }
+          .sphere-wrapper {
+            width: 280px !important;
+            height: 280px !important;
+          }
+          .sphere-ring-outer {
+            width: 260px !important;
+            height: 260px !important;
+          }
+          .sphere-ring-middle {
+            width: 200px !important;
+            height: 200px !important;
+          }
+          .sphere-core {
+            width: 140px !important;
+            height: 140px !important;
+          }
+          .sphere-orbit-dot {
+            width: 260px !important;
+            height: 260px !important;
           }
         }
       `}</style>
