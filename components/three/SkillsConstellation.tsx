@@ -86,30 +86,35 @@ function SkillNodeMesh({ node }: { node: SkillNode }) {
             {hovered && (
                 <>
                     <pointLight color={color} intensity={2} distance={2} />
-                    <Html distanceFactor={10} center>
+                    <Html distanceFactor={4} center>
                         <div
                             style={{
-                                background: 'rgba(9,9,11,0.95)',
-                                border: `1px solid ${color}44`,
-                                borderRadius: '8px',
-                                padding: '6px 12px',
+                                background: 'rgba(9,9,11,0.98)',
+                                border: `2px solid ${color}66`,
+                                borderRadius: '16px',
+                                padding: '24px 48px',
                                 color: '#F5F5F7',
                                 fontFamily: 'Inter, sans-serif',
-                                fontSize: '12px',
-                                fontWeight: 500,
+                                fontSize: '32px',
+                                fontWeight: 700,
                                 whiteSpace: 'nowrap',
                                 pointerEvents: 'none',
-                                boxShadow: `0 0 16px ${color}33`,
+                                boxShadow: `0 0 40px ${color}44`,
+                                backdropFilter: 'blur(8px)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '8px',
                             }}
                         >
                             {node.label}
                             <div
                                 style={{
-                                    fontSize: '10px',
+                                    fontSize: '16px',
                                     color: color,
-                                    marginTop: '2px',
-                                    letterSpacing: '0.08em',
+                                    letterSpacing: '0.12em',
                                     textTransform: 'uppercase',
+                                    fontWeight: 500,
                                 }}
                             >
                                 {node.category}
