@@ -7,10 +7,10 @@ import * as THREE from 'three'
 
 // Constants for orbital mechanics
 const MU = 100 // Gravitational parameter for our "earth" (off-screen)
-const RADIUS = 15 // Base orbital radius
+const RADIUS = 18 // Slightly larger radius for better framing
 const DRIFT_STRENGTH = 0.001 // Simulated orbital drift
 const STATION_KEEPING_THRESHOLD = 0.5 // Distance before auto-correction
-const THRUSTER_STRENGTH = 0.05
+const THRUSTER_STRENGTH = 0.08
 
 /**
  * Satellite Geometry (Procedural high-quality model)
@@ -26,15 +26,17 @@ function SatelliteModel({ thrusterActive, alignment }: { thrusterActive: boolean
         // 1. Attitude Control: Align model to velocity vector
         if (alignment.length() > 0.01) {
             const lookAtMatrix = new THREE.Matrix4()
+            // Satellite "forward" is Y up in Three.js default if we use lookAt, 
+            // but we want it to look "ahead" along velocity.
             lookAtMatrix.lookAt(new THREE.Vector3(0, 0, 0), alignment, new THREE.Vector3(0, 1, 0))
             const targetQuaternion = new THREE.Quaternion().setFromRotationMatrix(lookAtMatrix)
-            group.current.quaternion.slerp(targetQuaternion, 0.1)
+            group.current.quaternion.slerp(targetQuaternion, 0.05)
         }
 
-        // 2. Subtle reaction wheel jitter and antenna movement
+        // 2. Subtle reaction wheel jitter
         const t = state.clock.elapsedTime
-        group.current.rotation.x += Math.sin(t * 0.5) * 0.001
-        group.current.rotation.z += Math.cos(t * 0.3) * 0.001
+        group.current.rotation.x += Math.sin(t * 0.5) * 0.0005
+        group.current.rotation.z += Math.cos(t * 0.3) * 0.0005
     })
 
     return (
@@ -45,7 +47,7 @@ function SatelliteModel({ thrusterActive, alignment }: { thrusterActive: boolean
                 <meshStandardMaterial color="#27272A" metalness={0.9} roughness={0.1} />
             </mesh>
             
-            {/* Gold Foil / MLI Insulator Wrapper */}
+            {/* Gold Foil Wrapper */}
             <mesh position={[0, 0, 0]} scale={[1.05, 1.05, 1.05]}>
                 <boxGeometry args={[1, 0.8, 1]} />
                 <meshStandardMaterial color="#D4AF37" metalness={1} roughness={0.2} emissive="#443300" emissiveIntensity={0.2} />
@@ -93,7 +95,6 @@ function SatelliteModel({ thrusterActive, alignment }: { thrusterActive: boolean
                         <cylinderGeometry args={[0.05, 0.1, 0.2]} />
                         <meshStandardMaterial color="#3F3F46" metalness={1} />
                     </mesh>
-                    {/* Visual Thruster Flame */}
                     {thrusterActive && (
                         <mesh position={[0, -0.2, 0]}>
                             <coneGeometry args={[0.08, 0.4, 8]} />
@@ -106,9 +107,6 @@ function SatelliteModel({ thrusterActive, alignment }: { thrusterActive: boolean
     )
 }
 
-/**
- * Main Orbital Satellite Engine
- */
 export default function SatelliteOrbitalScene() {
     const pos = useRef(new THREE.Vector3(RADIUS, 0, 0))
     const vel = useRef(new THREE.Vector3(0, 0, Math.sqrt(MU / RADIUS)))
@@ -117,13 +115,15 @@ export default function SatelliteOrbitalScene() {
     const [thrusterActive, setThrusterActive] = useState(false)
     const [scrollOffset, setScrollOffset] = useState(0)
     
-    const center = useMemo(() => new THREE.Vector3(-10, 0, 0), [])
+    const center = useMemo(() => new THREE.Vector3(-15, 0, 0), [])
 
     useEffect(() => {
         const handleScroll = () => {
-            const sc = window.scrollY / (document.body.scrollHeight - window.innerHeight)
+            const scrollableHeight = document.body.scrollHeight - window.innerHeight
+            const sc = scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0
             setScrollOffset(sc)
         }
+        handleScroll()
         window.addEventListener('scroll', handleScroll)
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
@@ -131,18 +131,19 @@ export default function SatelliteOrbitalScene() {
     useFrame((_state, delta) => {
         const dt = Math.min(delta, 0.1)
 
-        // 1. Target Tracking (from Scroll)
-        const targetAngle = (scrollOffset * Math.PI) - Math.PI / 2
+        // 1. Target Tracking
+        // Map scroll to 120 degree arc
+        const targetAngle = (scrollOffset * Math.PI * 0.6) - Math.PI / 3
         const tx = center.x + Math.cos(targetAngle) * RADIUS
         const tz = center.z + Math.sin(targetAngle) * RADIUS
         targetPos.current.set(tx, 0, tz)
 
-        // 2. Orbital Mechanics Integration
+        // 2. Physics Integration
         const rVec = new THREE.Vector3().copy(pos.current).sub(center)
         const rMag = rVec.length()
         const gravity = rVec.normalize().multiplyScalar(-MU / (rMag * rMag))
         
-        // 3. Station Keeping & Scroll Manuevers
+        // 3. Thruster Logic
         const distToTarget = pos.current.distanceTo(targetPos.current)
         let thrusting = false
         
@@ -152,30 +153,28 @@ export default function SatelliteOrbitalScene() {
             vel.current.add(direction.multiplyScalar(THRUSTER_STRENGTH * dt))
         }
 
-        // Apply simulated drift
         vel.current.x += (Math.random() - 0.5) * DRIFT_STRENGTH
         vel.current.z += (Math.random() - 0.5) * DRIFT_STRENGTH
 
-        // 4. Position Update
         vel.current.add(gravity.multiplyScalar(dt))
         pos.current.add(new THREE.Vector3().copy(vel.current).multiplyScalar(dt))
 
-        setThrusterActive(thrusting)
+        if (thrusterActive !== thrusting) setThrusterActive(thrusting)
     })
 
     return (
         <>
-            <ambientLight intensity={0.2} />
-            <pointLight position={[10, 10, 10]} intensity={1.5} color="#FFFFFF" />
-            <pointLight position={[-10, -5, -5]} intensity={0.5} color="#6366F1" />
+            <ambientLight intensity={0.5} />
+            <pointLight position={[20, 20, 20]} intensity={2} color="#FFFFFF" />
+            <pointLight position={[-20, -10, -10]} intensity={1} color="#6366F1" />
 
             <group position={[pos.current.x, pos.current.y, pos.current.z]}>
-                <Float speed={2} rotationIntensity={0.2} floatIntensity={0.5}>
+                <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.2}>
                     <SatelliteModel thrusterActive={thrusterActive} alignment={vel.current} />
                 </Float>
             </group>
 
-            <PerspectiveCamera makeDefault position={[0, 5, 20]} fov={50} />
+            <PerspectiveCamera makeDefault position={[10, 15, 30]} fov={40} />
         </>
     )
 }
