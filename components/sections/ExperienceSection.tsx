@@ -6,35 +6,35 @@ import ScrollReveal from '../ScrollReveal'
 const experiences = [
     {
         id: 1,
-        role: 'Software Developer',
+        role: 'DevSecOps Engineer',
         company: 'IBM',
-        period: '2023 — Present',
+        period: '2025 — Present',
         location: 'Bengaluru, India',
         description:
-            'Architecting hybrid Azure Kubernetes Infrastructure with intelligent platform automation. Leading design and implementation of an AI-driven IDP (Backstage), managing multi-cluster AKS environments, and building GitOps pipelines with Terraform and GitHub Actions.',
-        tags: ['AKS', 'Kubernetes', 'Azure', 'Terraform', 'Backstage', 'GitOps'],
+            'I’m a DevSecOps engineer driven by the responsibility of keeping production systems secure, resilient, and fast at scale. I work deep within the codebase to understand how applications behave in real-world conditions, enabling me to design security and reliability into every stage of delivery. By building safe, optimized CI/CD pipelines and integrating SAST and DAST practices using tools like Azure Pipelines, SonarQube, and OWASP ZAP, I ensure vulnerabilities are caught early and releases remain stable. My focus is on shipping secure code without slowing teams down—balancing speed, security, and operational excellence to keep platforms running reliably in production.',
+        tags: ['Azure Pipelines', 'SonarQube', 'OWASP ZAP', 'Azure', 'GitOps'],
         current: true,
     },
     {
         id: 2,
-        role: 'DevOps Engineer',
-        company: 'IBM',
-        period: '2022 — 2023',
+        role: 'Associate Software Engineer - Development',
+        company: 'Kyndryl',
+        period: '2022 — 2025',
         location: 'Bengaluru, India',
         description:
             'Designed and maintained CI/CD pipelines for microservices deployments. Built containerized services with Docker, automated infrastructure provisioning with Terraform, and established monitoring and observability stacks for production workloads.',
-        tags: ['Docker', 'CI/CD', 'Terraform', 'Python', 'Monitoring'],
+        tags: ['Docker', 'Github Actions', 'Azure Pipelines', 'Terraform', 'Python', 'Monitoring', 'Kubernetes', 'AKS', 'Azure', 'Linux', 'Powershell', 'bash'],
         current: false,
     },
     {
         id: 3,
         role: 'Cloud & Systems Analyst',
         company: 'IBM',
-        period: '2021 — 2022',
+        period: '2021 — 2021',
         location: 'Bengaluru, India',
         description:
             'Delivered cloud migration assessments and hybrid infrastructure planning for enterprise clients. Collaborated with cross-functional teams to evaluate workloads, identify cloud-readiness, and produce architecture blueprints aligned to client goals.',
-        tags: ['Azure', 'Cloud Migration', 'Architecture', 'Enterprise'],
+        tags: ['Azure', 'Cloud Migration', 'Architecture', 'Enterprise', 'Managed Services'],
         current: false,
     },
 ]

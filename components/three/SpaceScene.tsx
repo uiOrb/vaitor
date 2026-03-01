@@ -10,11 +10,10 @@ import * as THREE from 'three'
 export function StarField() {
     const ref = useRef<THREE.Points>(null)
 
-    const { positions, sizes, opacities } = useMemo(() => {
+    const { positions, sizes } = useMemo(() => {
         const count = 12000
         const positions = new Float32Array(count * 3)
         const sizes = new Float32Array(count)
-        const opacities = new Float32Array(count)
         for (let i = 0; i < count; i++) {
             const r = 300 + Math.random() * 500
             const theta = Math.random() * Math.PI * 2
@@ -23,9 +22,8 @@ export function StarField() {
             positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta)
             positions[i * 3 + 2] = r * Math.cos(phi)
             sizes[i] = 0.5 + Math.random() * 2.0 // Brighter/Bigger
-            opacities[i] = 0.3 + Math.random() * 0.7
         }
-        return { positions, sizes, opacities }
+        return { positions, sizes }
     }, [])
 
     useFrame((state, delta) => {
@@ -99,7 +97,7 @@ export function GalaxyParticles() {
         return temp
     }, [])
 
-    useFrame((state, delta) => {
+    useFrame(() => {
         asteroids.forEach((ast, i) => {
             // Chaotic drift
             ast.position.add(ast.velocity)

@@ -71,7 +71,7 @@ export default function AboutSection() {
                                     marginBottom: '24px',
                                 }}
                             >
-                                I&apos;m Reeve Lobo — a Software Developer at IBM, based in Bengaluru, India.
+                                I&apos;m Reeve Lobo — a Infrastructure Specialist at IBM, based in Bengaluru, India.
                                 My work sits at the intersection of infrastructure, cloud architecture, and intelligent
                                 systems, where I turn complex problems into elegant solutions that scale.
                             </p>

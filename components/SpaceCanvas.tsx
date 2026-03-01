@@ -7,8 +7,6 @@ import { StarField, GalaxyParticles, Planet } from '@/components/three/SpaceScen
 function CameraController() {
     const { camera, mouse } = useThree()
     const scrollRef = useRef(0)
-    const targetZ = useRef(30)
-    const targetRotX = useRef(0)
 
     useEffect(() => {
         const handleScroll = () => {
@@ -19,7 +17,7 @@ function CameraController() {
         return () => window.removeEventListener('scroll', handleScroll)
     }, [])
 
-    useFrame((state) => {
+    useFrame(() => {
         // Scroll-driven position
         const sc = scrollRef.current
         const zPos = 30 - sc * 110 // Deeper zoom

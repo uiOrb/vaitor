@@ -404,7 +404,7 @@ export default function ContactSection() {
                                             opacity: 0.6,
                                         }}
                                     >
-                                        Transmitted directly to reevelobo@outlook.com
+                                        Transmitted directly to the void ship
                                     </p>
                                 </motion.form>
                             )}
