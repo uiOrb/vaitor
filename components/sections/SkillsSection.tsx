@@ -2,6 +2,7 @@
 import { Suspense, useRef, useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import ScrollReveal from '../ScrollReveal'
+import CosmicBackground from './CosmicBackground'
 
 const SkillsCanvas = dynamic(() => import('../SkillsCanvas'), { ssr: false })
 
@@ -14,7 +15,6 @@ const categories = [
 
 export default function SkillsSection() {
     const sectionRef = useRef<HTMLElement>(null)
-    const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
     const [opacity, setOpacity] = useState(0)
 
     useEffect(() => {
@@ -58,26 +58,9 @@ export default function SkillsSection() {
                 minHeight: '100vh',
             }}
         >
-            {/* 1. Deep Space Base (Static Stars) */}
-            <div
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-                    backgroundImage: `
-                        radial-gradient(1px 1px at 10% 10%, #fff, transparent),
-                        radial-gradient(1px 1px at 20% 50%, #fff, transparent),
-                        radial-gradient(1.5px 1.5px at 40% 80%, #fff, transparent),
-                        radial-gradient(1px 1px at 60% 20%, #fff, transparent),
-                        radial-gradient(1.5px 1.5px at 80% 40%, #fff, transparent),
-                        radial-gradient(1px 1px at 90% 70%, #fff, transparent)
-                    `,
-                    backgroundSize: '250px 250px',
-                    opacity: 0.1,
-                    pointerEvents: 'none',
-                }}
-            />
+            <CosmicBackground />
 
-            {/* 2. Nebula Glows (Ambient) */}
+            {/* Nebula Glows (Ambient) */}
             <div
                 style={{
                     position: 'absolute',
@@ -90,46 +73,12 @@ export default function SkillsSection() {
                 }}
             />
 
-            {/* 3. Upclose Stars (Interactive - Masked by Mouse) */}
+            {/* Spotlight Overlay (Additional soft glow) */}
             <div
                 style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundImage: `
-                        radial-gradient(2px 2px at 15% 15%, #fff, transparent),
-                        radial-gradient(2px 2px at 35% 45%, #fff, transparent),
-                        radial-gradient(2.5px 2.5px at 55% 75%, #fff, transparent),
-                        radial-gradient(2px 2px at 75% 25%, #fff, transparent),
-                        radial-gradient(3px 3px at 85% 55%, #fff, transparent),
-                        radial-gradient(2px 2px at 45% 15%, #fff, transparent)
-                    `,
-                    backgroundSize: '300px 300px',
-                    maskImage: `radial-gradient(450px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
-                    WebkitMaskImage: `radial-gradient(450px circle at var(--mouse-x) var(--mouse-y), black 20%, transparent 100%)`,
-                    opacity: opacity,
-                    filter: 'blur(0.5px) drop-shadow(0 0 4px rgba(255,255,255,0.8))',
-                    transition: 'opacity 0.5s ease',
-                    pointerEvents: 'none',
-                }}
-            />
-
-            {/* 4. Cosmic Dust / Noise */}
-            <div
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-                    opacity: 0.02,
-                    pointerEvents: 'none',
-                    backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
-                }}
-            />
-
-            {/* 5. The Spotlight Reveal */}
-            <div
-                style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.08), transparent 80%)`,
+                    background: `radial-gradient(600px circle at var(--mouse-x) var(--mouse-y), rgba(99, 102, 241, 0.04), transparent 80%)`,
                     opacity: opacity,
                     transition: 'opacity 0.5s ease',
                     pointerEvents: 'none',
@@ -137,7 +86,6 @@ export default function SkillsSection() {
             />
 
             <div className="section-inner" style={{ position: 'relative', zIndex: 1 }}>
-...
                 {/* Header */}
                 <div style={{ textAlign: 'center', marginBottom: '80px' }}>
                     <ScrollReveal>
