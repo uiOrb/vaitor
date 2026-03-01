@@ -8,6 +8,12 @@ jest.mock('@react-three/fiber', () => ({
     useThree: () => ({ camera: {}, mouse: { x: 0, y: 0 } }),
 }))
 
+// Mock drei
+jest.mock('@react-three/drei', () => ({
+    Float: ({ children }: any) => <div data-testid="mock-float">{children}</div>,
+    PerspectiveCamera: () => <div data-testid="mock-camera" />,
+}))
+
 // Mock the heavy 3D scenes
 jest.mock('@/components/three/SpaceScene', () => ({
     StarField: () => <div data-testid="star-field">StarField</div>,
